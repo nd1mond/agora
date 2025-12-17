@@ -90,7 +90,7 @@
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <button class="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-full transition-colors relative" onclick="toggleMobileMenu()">
+                    <button class="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-full transition-colors relative z-50" onclick="toggleMobileMenu()">
                         <i data-lucide="menu" id="menu-icon" class="w-6 h-6 transition-all duration-300 transform rotate-0 scale-100"></i>
                         <i data-lucide="x" id="close-icon" class="w-6 h-6 absolute top-2 left-2 transition-all duration-300 transform -rotate-90 scale-0 opacity-0"></i>
                     </button>
@@ -114,7 +114,7 @@
 
     <main class="flex-grow">
 
-        <section id="landing-section" class="relative h-screen w-full overflow-hidden bg-white flex flex-col items-center justify-center sticky top-0 -z-10">
+        <section id="landing-section" class="relative h-screen w-full overflow-hidden bg-white flex flex-col items-center justify-center sticky top-0 z-0">
 
             <div class="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-gradient-to-bl from-purple-600 via-fuchsia-500 to-indigo-600 rounded-full blur-[100px] opacity-40 animate-pulse"></div>
             <div class="absolute bottom-[-20%] left-[-10%] w-[700px] h-[700px] bg-gradient-to-tr from-blue-600 via-cyan-500 to-teal-400 rounded-full blur-[100px] opacity-30"></div>
@@ -132,13 +132,13 @@
             </div>
 
             <div id="scroll-indicator" class="absolute bottom-12 left-1/2 -translate-x-1/2 z-50">
-                <button onclick="scrollToBase()" class="animate-bounce opacity-70 hover:opacity-100 transition-opacity p-4 cursor-pointer bg-white/60 backdrop-blur-md rounded-full shadow-sm border border-white/50">
-                    <i data-lucide="chevron-down" class="w-8 h-8 text-[#1D1D1F]"></i>
+                <button onclick="scrollToBase()" class="animate-bounce opacity-70 hover:opacity-100 transition-opacity p-4 cursor-pointer bg-white/60 backdrop-blur-md rounded-full shadow-sm border border-white/50 group">
+                    <i data-lucide="chevron-down" class="w-8 h-8 text-[#1D1D1F] group-hover:text-apple-blue transition-colors"></i>
                 </button>
             </div>
         </section>
 
-        <section id="base-section" class="relative z-10 bg-white min-h-screen w-full rounded-t-[3rem] shadow-[0_-20px_60px_-15px_rgba(0,0,0,0.1)] pb-10">
+        <section id="base-section" class="relative z-20 bg-white min-h-screen w-full rounded-t-[3rem] shadow-[0_-20px_60px_-15px_rgba(0,0,0,0.1)] pb-10">
             <div class="pt-24 pb-16 lg:pt-32 lg:pb-32 overflow-hidden">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
@@ -257,7 +257,10 @@
     </div>
 
     <script>
-        lucide.createIcons();
+        // Инициализация иконок (ТОЛЬКО ЗДЕСЬ)
+        document.addEventListener("DOMContentLoaded", function() {
+            lucide.createIcons();
+        });
 
         function scrollToBase() {
             document.getElementById('base-section').scrollIntoView({ behavior: 'smooth' });
@@ -283,17 +286,13 @@
 
             if (content) {
                 const progress = Math.min(scrollY / windowHeight, 1);
-                // Fade out
                 const opacity = Math.max(0, 1 - progress * 2.5);
-                // Scale down slightly
                 const scale = 1 - progress * 0.1;
-                // Move down faster than scroll (parallax)
                 const translateY = progress * 100;
 
                 content.style.opacity = opacity;
                 content.style.transform = `scale(${scale}) translateY(${translateY}px)`;
 
-                // Hide scroll indicator quickly
                 if(indicator) indicator.style.opacity = Math.max(0, 1 - progress * 4);
             }
         });
@@ -415,7 +414,7 @@
                     </div>
                 `;
             } else if (view === 'reset') {
-                 // RESET FORM (Not really used now since we redirect, but kept for logic)
+                 // RESET FORM
                  html = `
                     <div class="text-center mb-8 animate-fade-in">
                         <h2 class="text-2xl font-bold text-apple-text tracking-tight mb-2">Восстановление</h2>
