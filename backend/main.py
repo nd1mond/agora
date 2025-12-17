@@ -27,18 +27,14 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 templates = Jinja2Templates(directory="templates")
 
 # ==========================================
-# 📧 НАСТРОЙКИ ПОЧТЫ (ВСТАВЬ СВОИ ДАННЫЕ!)
+# 📧 НАСТРОЙКИ ПОЧТЫ
 # ==========================================
-# Если используешь Яндекс: smtp.yandex.ru, порт 465
-# Если Gmail: smtp.gmail.com, порт 465
-# ОБЯЗАТЕЛЬНО: Пароль приложения (App Password), а не обычный пароль!
-
 conf = ConnectionConfig(
-    MAIL_USERNAME="za1tsef@yandex.ru",  # <--- ВПИШИ СЮДА ПОЧТУ
-    MAIL_PASSWORD="bgzosjdmskgpyxjx",  # <--- ВПИШИ СЮДА ПАРОЛЬ ПРИЛОЖЕНИЯ
-    MAIL_FROM="za1tsef@yandex.ru",  # <--- ВПИШИ СЮДА ПОЧТУ ЕЩЕ РАЗ
+    MAIL_USERNAME="za1tsef@yandex.ru",
+    MAIL_PASSWORD="bgzosjdmskgpyxjx",
+    MAIL_FROM="za1tsef@yandex.ru",
     MAIL_PORT=465,
-    MAIL_SERVER="smtp.yandex.ru",  # Или smtp.gmail.com
+    MAIL_SERVER="smtp.yandex.ru",
     MAIL_STARTTLS=False,
     MAIL_SSL_TLS=True,
     USE_CREDENTIALS=True,
@@ -89,6 +85,25 @@ async def send_verification_email(email: str, code: str):
     await fm.send_message(message)
 
 
+# --- НОВАЯ ФУНКЦИЯ: Письмо для сброса пароля ---
+async def send_reset_email(email: str, code: str):
+    html = f"""
+    <div style="font-family: sans-serif; text-align: center; padding: 20px;">
+        <h2 style="color: #333;">Сброс пароля Agora</h2>
+        <p style="font-size: 16px;">Ваш код для создания нового пароля:</p>
+        <h1 style="color: #007EC6; font-size: 32px; letter-spacing: 5px;">{code}</h1>
+    </div>
+    """
+    message = MessageSchema(
+        subject="Код сброса пароля",
+        recipients=[email],
+        body=html,
+        subtype=MessageType.html
+    )
+    fm = FastMail(conf)
+    await fm.send_message(message)
+
+
 # ==========================================
 # 🚦 МАРШРУТЫ (ROUTES)
 # ==========================================
@@ -101,21 +116,18 @@ def read_root(request: Request):
 # 1. РЕГИСТРАЦИЯ -> ОТПРАВКА КОДА
 @app.post("/register")
 async def register_user(
-        background_tasks: BackgroundTasks,  # Чтобы сайт не тормозил пока отправляется письмо
+        background_tasks: BackgroundTasks,
         name: str = Form(...),
         email: str = Form(...),
         password: str = Form(...),
         db: Session = Depends(get_db)
 ):
-    # Проверка email
     if db.query(models.User).filter(models.User.email == email).first():
         raise HTTPException(status_code=400, detail="Этот Email уже зарегистрирован")
 
-    # Генерируем код 1000-9999
     code = str(random.randint(1000, 9999))
     hashed_pw = get_password_hash(password)
 
-    # Создаем НЕАКТИВНОГО пользователя
     new_user = models.User(
         username=name,
         email=email,
@@ -128,13 +140,11 @@ async def register_user(
     db.commit()
     db.refresh(new_user)
 
-    # Отправляем письмо в фоне (чтобы пользователь не ждал)
     try:
         background_tasks.add_task(send_verification_email, email, code)
     except Exception as e:
         print(f"Ошибка отправки: {e}")
 
-    # Перекидываем на страницу ввода кода
     return RedirectResponse(url=f"/verify_page?email={email}", status_code=303)
 
 
@@ -154,37 +164,40 @@ def verify_code_action(
     user = db.query(models.User).filter(models.User.email == email).first()
 
     if not user:
-        return RedirectResponse(url="/", status_code=303)  # Если юзера нет - на главную
+        return RedirectResponse(url="/", status_code=303)
 
     if user.verification_code == code:
-        # Успех! Активируем
         user.is_active = True
         user.verification_code = None
         db.commit()
         return RedirectResponse(url="/dashboard", status_code=303)
     else:
-        # Ошибка
         return templates.TemplateResponse("verify.html", {
             "request": {}, "email": email, "error": "Неверный код! Попробуйте еще раз."
         })
 
 
 # 4. ВХОД (LOGIN)
+# 4. ВХОД (LOGIN) — ОБНОВЛЕННАЯ ВЕРСИЯ
 @app.post("/login")
 def login_user(
+        request: Request,  # <--- Добавили Request, чтобы возвращать шаблон
         email: str = Form(...),
         password: str = Form(...),
         db: Session = Depends(get_db)
 ):
     user = db.query(models.User).filter(models.User.email == email).first()
 
-    # Проверяем пароль
+    # Если пользователя нет ИЛИ пароль не подошел
     if not user or not verify_password(password, user.password_hash):
-        raise HTTPException(status_code=400, detail="Неверный логин или пароль")
+        # ВМЕСТО ОШИБКИ ВОЗВРАЩАЕМ ГЛАВНУЮ СТРАНИЦУ С ПРЕДУПРЕЖДЕНИЕМ
+        return templates.TemplateResponse("index.html", {
+            "request": request,
+            "login_error": "Неверный email или пароль"  # <--- Вот наше сообщение
+        })
 
-    # Проверяем, подтвердил ли он почту!
+    # Проверка почты (тут тоже можно вернуть ошибку красиво, но пока оставим редирект)
     if not user.is_active:
-        # Если не подтвердил - кидаем снова на ввод кода
         return RedirectResponse(url=f"/verify_page?email={email}", status_code=303)
 
     return RedirectResponse(url="/dashboard", status_code=303)
@@ -194,7 +207,7 @@ def login_user(
 @app.get("/dashboard")
 def dashboard_page(request: Request, db: Session = Depends(get_db)):
     files = db.query(models.Material).all()
-    user_info = {"username": "Студент", "email": "test@mai.ru", "letter": "S"}  # Заглушка
+    user_info = {"username": "Студент", "email": "test@mai.ru", "letter": "S"}
 
     return templates.TemplateResponse("dashboard.html", {
         "request": request,
@@ -222,3 +235,68 @@ def upload_material(
     db.add(new_material)
     db.commit()
     return RedirectResponse(url="/dashboard", status_code=303)
+
+
+# ==========================================
+# 🔄 НОВЫЕ МАРШРУТЫ ВОССТАНОВЛЕНИЯ ПАРОЛЯ
+# ==========================================
+
+# 7. Страница ввода Email
+@app.get("/forgot-password")
+def forgot_password_page(request: Request):
+    return templates.TemplateResponse("forgot.html", {"request": request})
+
+
+# 8. Обработка Email и отправка кода
+@app.post("/forgot-password")
+async def forgot_password_action(
+        background_tasks: BackgroundTasks,
+        email: str = Form(...),
+        db: Session = Depends(get_db)
+):
+    user = db.query(models.User).filter(models.User.email == email).first()
+
+    # Если пользователя нет, показываем ошибку
+    if not user:
+        return templates.TemplateResponse("forgot.html", {
+            "request": {},
+            "error": "Пользователь с таким email не найден"
+        })
+
+    # Генерируем код
+    code = str(random.randint(1000, 9999))
+    user.verification_code = code
+    db.commit()
+
+    # Отправляем письмо в фоне
+    background_tasks.add_task(send_reset_email, email, code)
+
+    return RedirectResponse(url=f"/reset-password?email={email}", status_code=303)
+
+
+# 9. Страница сброса (Код + Новый пароль)
+@app.get("/reset-password")
+def reset_password_page(request: Request, email: str):
+    return templates.TemplateResponse("reset.html", {"request": request, "email": email})
+
+
+# 10. Финальная смена пароля
+@app.post("/reset-password")
+def reset_password_final(
+        email: str = Form(...),
+        code: str = Form(...),
+        new_password: str = Form(...),
+        db: Session = Depends(get_db)
+):
+    user = db.query(models.User).filter(models.User.email == email).first()
+
+    if not user or user.verification_code != code:
+        return templates.TemplateResponse("reset.html", {
+            "request": {}, "email": email, "error": "Неверный код!"
+        })
+
+    user.password_hash = get_password_hash(new_password)
+    user.verification_code = None
+    db.commit()
+
+    return RedirectResponse(url="/", status_code=303)

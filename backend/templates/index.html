@@ -5,13 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agora - Биржа учебных материалов</title>
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Config -->
     <script>
       tailwind.config = {
         theme: {
@@ -71,21 +68,17 @@
 </head>
 <body class="flex flex-col min-h-screen">
 
-    <!-- === HEADER === -->
     <header id="main-header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-transparent">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
 
-                <!-- Left Side: Logo + Nav Items (Grouped together like in React version) -->
                 <div class="flex items-center gap-6 md:gap-10">
-                    <!-- Logo -->
                     <div class="flex items-center gap-2 cursor-pointer group" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">
                         <span class="font-extrabold text-2xl tracking-tighter text-apple-text group-hover:text-apple-blue transition-colors duration-300">
                             Agora<span class="text-apple-blue group-hover:text-apple-text transition-colors duration-300">.</span>
                         </span>
                     </div>
 
-                    <!-- Desktop Nav (Moved to Left) -->
                     <nav class="hidden md:flex items-center space-x-1">
                         <button onclick="openModal('about-modal')" class="px-3 py-2 rounded-full text-sm font-medium text-apple-text hover:bg-black/5 transition-all">О нас</button>
                         <div class="w-px h-4 bg-gray-300 mx-2"></div>
@@ -96,9 +89,7 @@
                     </nav>
                 </div>
 
-                <!-- Right Side: Only Mobile Menu (Auth Buttons Removed) -->
                 <div class="flex items-center gap-3">
-                    <!-- Mobile Menu Button -->
                     <button class="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-full transition-colors relative" onclick="toggleMobileMenu()">
                         <i data-lucide="menu" id="menu-icon" class="w-6 h-6 transition-all duration-300 transform rotate-0 scale-100"></i>
                         <i data-lucide="x" id="close-icon" class="w-6 h-6 absolute top-2 left-2 transition-all duration-300 transform -rotate-90 scale-0 opacity-0"></i>
@@ -107,7 +98,6 @@
             </div>
         </div>
 
-        <!-- Mobile Menu Overlay -->
         <div id="mobile-menu" class="hidden md:hidden fixed inset-0 top-0 bg-white/95 backdrop-blur-xl z-40 pt-24 px-6 flex flex-col items-center space-y-6 animate-fade-in">
              <button onclick="openModal('about-modal'); toggleMobileMenu()" class="text-2xl font-semibold text-apple-text tracking-tight">О нас</button>
              <button class="flex items-center gap-2 text-xl font-medium text-gray-600">
@@ -122,19 +112,14 @@
         </div>
     </header>
 
-    <!-- === MAIN CONTENT === -->
     <main class="flex-grow">
 
-        <!-- SECTION 1: LANDING (AURORA PARALLAX) -->
-        <!-- sticky container to create parallax effect where next section covers it -->
         <section id="landing-section" class="relative h-screen w-full overflow-hidden bg-white flex flex-col items-center justify-center sticky top-0 -z-10">
 
-            <!-- Background Blobs -->
             <div class="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-gradient-to-bl from-purple-600 via-fuchsia-500 to-indigo-600 rounded-full blur-[100px] opacity-40 animate-pulse"></div>
             <div class="absolute bottom-[-20%] left-[-10%] w-[700px] h-[700px] bg-gradient-to-tr from-blue-600 via-cyan-500 to-teal-400 rounded-full blur-[100px] opacity-30"></div>
             <div class="absolute inset-0 bg-white/20 backdrop-blur-[1px]"></div>
 
-            <!-- Content -->
             <div id="landing-content" class="flex flex-col items-center max-w-6xl mx-auto px-6 text-center z-10 transition-transform duration-75 ease-out origin-center">
                 <h1 class="text-6xl md:text-9xl font-bold tracking-tighter text-[#1D1D1F] mb-8 leading-[0.95] animate-fade-up drop-shadow-sm">
                     <span class="bg-clip-text text-transparent bg-gradient-to-b from-[#1D1D1F] to-[#454545]">
@@ -144,10 +129,8 @@
                 <p class="text-2xl md:text-3xl text-gray-600 font-medium leading-relaxed max-w-3xl mx-auto mb-10 animate-fade-up" style="animation-delay: 0.2s">
                     Единая платформа для обмена учебными материалами. Загружайте лекции, получайте AI-анализ и учитесь быстрее.
                 </p>
-                <!-- Start Work Button REMOVED here -->
             </div>
 
-            <!-- Scroll Indicator -->
             <div id="scroll-indicator" class="absolute bottom-12 left-1/2 -translate-x-1/2 z-50">
                 <button onclick="scrollToBase()" class="animate-bounce opacity-70 hover:opacity-100 transition-opacity p-4 cursor-pointer bg-white/60 backdrop-blur-md rounded-full shadow-sm border border-white/50">
                     <i data-lucide="chevron-down" class="w-8 h-8 text-[#1D1D1F]"></i>
@@ -155,13 +138,11 @@
             </div>
         </section>
 
-        <!-- SECTION 2: MARKETING / AUTH CARD -->
         <section id="base-section" class="relative z-10 bg-white min-h-screen w-full rounded-t-[3rem] shadow-[0_-20px_60px_-15px_rgba(0,0,0,0.1)] pb-10">
             <div class="pt-24 pb-16 lg:pt-32 lg:pb-32 overflow-hidden">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
 
-                        <!-- Left: Typography -->
                         <div class="flex-1 text-center lg:text-left z-10">
                             <h1 class="text-5xl md:text-7xl font-bold tracking-tighter leading-[1.05] mb-6 animate-fade-up">
                                 <span class="block text-[#1D1D1F]">Биржа знаний</span>
@@ -172,18 +153,13 @@
                             <p class="text-lg md:text-xl text-[#86868b] font-medium leading-relaxed max-w-xl mx-auto lg:mx-0 animate-fade-up" style="animation-delay: 0.2s">
                                 Забудь про долгий поиск материалов. Загружай лекции, получай мгновенный AI-анализ и готовься к экзаменам в два раза быстрее.
                             </p>
-
-                            <!-- Features Icons (REMOVED) -->
                         </div>
 
-                        <!-- Right: Interactive Auth Card -->
                         <div class="flex-1 w-full max-w-md lg:max-w-[500px] relative animate-fade-up" style="animation-delay: 0.5s">
 
-                            <!-- Blobs behind card -->
                             <div class="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full opacity-60 blur-3xl pointer-events-none animate-pulse-slow"></div>
                             <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-gradient-to-tr from-green-50 to-blue-50 rounded-full opacity-60 blur-3xl pointer-events-none animate-pulse-slow" style="animation-delay: 2s"></div>
 
-                            <!-- Card Content -->
                             <div class="bg-white/90 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-gray-200 ring-1 ring-black/5 p-8 md:p-10 relative overflow-hidden transition-all hover:shadow-[0_0_25px_rgba(0,126,198,0.3)] duration-500">
                                 <div class="relative flex flex-col items-center text-center py-2">
                                     <div class="w-16 h-16 rounded-2xl bg-blue-50/80 flex items-center justify-center mb-6 ring-1 ring-blue-100 shadow-sm">
@@ -194,7 +170,6 @@
                                         Чтобы получить доступ к базе материалов и AI-функциям, войдите в аккаунт.
                                     </p>
 
-                                    <!-- Features List (Added to match React) -->
                                     <div class="flex flex-col gap-3 w-full mb-8 px-4 text-left">
                                         <div class="flex items-center gap-3 text-[15px] text-gray-600 font-medium">
                                             <i data-lucide="check-circle-2" class="w-[18px] h-[18px] text-green-500 flex-shrink-0"></i>
@@ -226,7 +201,6 @@
                 </div>
             </div>
 
-            <!-- Footer -->
             <footer class="bg-white border-t border-gray-100 py-12">
                 <div class="max-w-7xl mx-auto px-4 text-center text-gray-400 text-sm">
                     <p>&copy; 2024 Agora. Все права защищены.</p>
@@ -235,9 +209,6 @@
         </section>
     </main>
 
-    <!-- === GLOBAL MODALS === -->
-
-    <!-- 1. ABOUT MODAL -->
     <div id="about-modal" class="fixed inset-0 z-[100] hidden transition-opacity duration-300 opacity-0" aria-hidden="true">
         <div class="absolute inset-0 bg-black/30 backdrop-blur-md" onclick="closeModal('about-modal')"></div>
         <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
@@ -273,22 +244,18 @@
         </div>
     </div>
 
-    <!-- 2. AUTH MODAL -->
     <div id="auth-modal" class="fixed inset-0 z-[100] hidden transition-opacity duration-300 opacity-0">
         <div class="absolute inset-0 bg-black/30 backdrop-blur-md" onclick="closeModal('auth-modal')"></div>
         <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
             <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-[420px] p-8 pt-10 pointer-events-auto transform scale-95 transition-all duration-300 relative overflow-hidden" id="auth-modal-content">
                 <button onclick="closeModal('auth-modal')" class="absolute top-5 right-5 text-gray-400 hover:text-black hover:bg-gray-100 p-2 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
 
-                <!-- Dynamic Content Container -->
                 <div id="auth-content">
-                    <!-- Filled by JS -->
-                </div>
+                    </div>
             </div>
         </div>
     </div>
 
-    <!-- GLOBAL JS -->
     <script>
         lucide.createIcons();
 
@@ -409,7 +376,7 @@
                             <input type="password" name="password" placeholder="Пароль" class="w-full pl-11 pr-4 py-3.5 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-apple-blue/50 transition-all font-medium" required>
                         </div>
                         <div class="flex justify-end">
-                             <button type="button" onclick="renderAuthContent('reset')" class="text-xs font-medium text-gray-500 hover:text-apple-blue">Забыли пароль?</button>
+                             <a href="/forgot-password" class="text-xs font-medium text-gray-500 hover:text-apple-blue">Забыли пароль?</a>
                         </div>
                         <button type="submit" class="w-full py-3.5 rounded-xl bg-apple-text hover:bg-black text-white font-bold shadow-lg transition-all flex items-center justify-center gap-2">
                             <span>Войти</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>
@@ -448,7 +415,7 @@
                     </div>
                 `;
             } else if (view === 'reset') {
-                 // RESET FORM
+                 // RESET FORM (Not really used now since we redirect, but kept for logic)
                  html = `
                     <div class="text-center mb-8 animate-fade-in">
                         <h2 class="text-2xl font-bold text-apple-text tracking-tight mb-2">Восстановление</h2>
@@ -473,5 +440,29 @@
             lucide.createIcons(); // Re-init icons for dynamic content
         }
     </script>
+
+    {% if login_error %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. Сразу открываем окно входа
+            renderAuthContent('login');
+            openModal('auth-modal');
+
+            // 2. Создаем красивую красную плашку с ошибкой
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'bg-red-50 text-red-500 p-3 rounded-xl mb-4 text-sm font-medium text-center border border-red-100 animate-fade-in';
+            errorDiv.innerText = "{{ login_error }}";
+
+            // 3. Вставляем её прямо перед формой
+            const container = document.getElementById('auth-content');
+            const header = container.querySelector('.text-center'); // Заголовок "С возвращением"
+
+            if (header) {
+                header.after(errorDiv); // Ставим ПОСЛЕ заголовка
+            }
+        });
+    </script>
+    {% endif %}
+
 </body>
 </html>
