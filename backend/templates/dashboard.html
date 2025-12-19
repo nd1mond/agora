@@ -2,23 +2,977 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Тест Кабинета</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agora - Личный кабинет</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', 'Helvetica', 'Arial', 'sans-serif'],
+            },
+            colors: {
+              apple: {
+                blue: '#007EC6',
+                text: '#1D1D1F',
+                bg: '#F5F5F7',
+                gray: '#86868b'
+              }
+            }
+          }
+        }
+      }
+    </script>
+
+    <style>
+        body {
+            background-color: #F5F5F7;
+            color: #1D1D1F;
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Логика навигации */
+        .nav-item { transition: all 0.2s ease; }
+        .nav-item:not(.active):hover { background-color: #f3f4f6; }
+        .nav-item:not(.active):hover i { color: #1D1D1F !important; }
+
+        .nav-item.active { background-color: #000; color: #fff; cursor: default; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .nav-item.active i { color: #fff !important; }
+
+        /* Модальные окна */
+        .modal-backdrop { transition: opacity 0.3s ease-out; }
+        .modal-content { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal-hidden { opacity: 0; pointer-events: none; }
+        .modal-hidden .modal-content { transform: scale(0.95) translateY(20px); }
+        .modal-visible { opacity: 1; pointer-events: auto; }
+        .modal-visible .modal-content { transform: scale(1) translateY(0); }
+
+        /* Анимация свича */
+        .switch-dot { transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); }
+
+        /* Стили для чекбокса задач */
+        .task-checkbox:checked + div { background-color: #10B981; border-color: #10B981; }
+        .task-checkbox:checked + div svg { display: block; }
+
+        /* Стили календаря */
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            cursor: pointer; opacity: 0.6; transition: 0.2s;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator:hover,
+        input[type="time"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+        }
+
+        /* Тогглы для настроек */
+        .settings-toggle:checked + div { background-color: #007EC6; }
+        .settings-toggle:checked + div .toggle-dot { transform: translateX(1.25rem); }
+    </style>
 </head>
-<body style="font-family: sans-serif; padding: 50px; text-align: center;">
+<body class="h-screen flex font-sans">
 
-    <h1 style="color: green;">✅ УРА! ТЫ ВНУТРИ!</h1>
+    <aside class="w-72 bg-white border-r border-gray-100 flex flex-col flex-shrink-0 z-40">
+        <div class="p-8 flex flex-col items-center text-center cursor-pointer" onclick="openUserProfile(state.user.id)">
+            <div id="sb-avatar-container" class="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center text-apple-blue font-bold text-3xl mb-4 shadow-inner ring-4 ring-white overflow-hidden transition-none relative">
+                <span id="sb-avatar-text">S</span>
+                <img id="sb-avatar-img" src="" class="absolute inset-0 w-full h-full object-cover hidden">
+            </div>
+            <h2 id="sb-user-name" class="font-bold text-xl tracking-tight leading-tight">Student User</h2>
+        </div>
 
-    <h2>Привет, {{ user.username }}!</h2>
+        <nav class="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
+            <button onclick="switchView('feed')" id="nav-feed" class="nav-item active w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-medium text-sm text-gray-500">
+                <i data-lucide="compass" class="w-5 h-5 text-gray-400 transition-none"></i> База знаний
+            </button>
+            <button onclick="switchView('storage')" id="nav-storage" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-medium text-sm text-gray-500">
+                <i data-lucide="layout" class="w-5 h-5 text-gray-400 transition-none"></i> Мое хранилище
+            </button>
+            <button onclick="switchView('favorites')" id="nav-favorites" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm text-gray-500">
+                <i data-lucide="star" class="w-5 h-5 text-gray-400 transition-none"></i> Избранное
+            </button>
+            <button onclick="switchView('tasks')" id="nav-tasks" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-medium text-sm text-gray-500">
+                <div class="flex items-center gap-3 flex-1">
+                    <i data-lucide="check-square" class="w-5 h-5 text-gray-400 transition-none"></i> Задачи
+                </div>
+                <span id="tasks-badge" class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full hidden">0</span>
+            </button>
+            <button onclick="switchView('settings')" id="nav-settings" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-medium text-sm text-gray-500">
+                <i data-lucide="settings" class="w-5 h-5 text-gray-400 transition-none"></i> Настройки
+            </button>
 
-    <p>Если ты видишь этот экран, значит:</p>
-    <ul style="display: inline-block; text-align: left;">
-        <li>1. Сервер работает.</li>
-        <li>2. Регистрация прошла успешно.</li>
-        <li>3. Тебя перенаправило в личный кабинет.</li>
-    </ul>
+            <div id="urgent-section" class="mt-10 px-2 hidden">
+                <div class="flex items-center gap-2 text-red-500 mb-4 px-2">
+                    <i data-lucide="flame" class="w-4 h-4 fill-current"></i>
+                    <span class="text-[11px] font-bold uppercase tracking-widest">Горят дедлайны</span>
+                </div>
+                <div id="urgent-tasks-list" class="space-y-2"></div>
+            </div>
+        </nav>
 
-    <br><br>
-    <a href="/">Вернуться на главную</a>
+        <div class="p-6 border-t border-gray-50">
+            <button onclick="location.href='index.html'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 transition-all font-bold text-sm">
+                <i data-lucide="log-out" class="w-5 h-5"></i> Выйти
+            </button>
+        </div>
+    </aside>
 
+    <main class="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-12">
+
+        <div id="view-feed" class="view-section active max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-bold tracking-tight flex items-center gap-3 text-apple-text">
+                        <img src="https://img.icons8.com/fluency/48/books.png" class="w-10 h-10" />
+                        База знаний
+                    </h1>
+                    <p class="text-gray-500 font-medium mt-1">Находите лекции, конспекты и шпоры</p>
+                </div>
+                <div class="relative w-full md:w-96 group">
+                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-apple-blue transition-colors"></i>
+                    <input type="text" id="feed-search" oninput="renderFeed()" placeholder="Поиск по материалам..." class="w-full pl-12 pr-4 py-4 bg-white border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-blue-50 transition-all font-medium shadow-sm">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 items-end">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Предмет</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-apple-blue transition-colors"><i data-lucide="filter" class="w-4 h-4"></i></div>
+                        <select id="filter-subject" onchange="renderFeed()" class="w-full pl-11 pr-10 py-3.5 bg-white border border-gray-100 rounded-2xl font-semibold text-gray-700 outline-none cursor-pointer appearance-none shadow-sm transition-all"><option value="All">Все предметы</option></select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400"><i data-lucide="chevron-down" class="w-4 h-4"></i></div>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Курс</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-apple-blue transition-colors"><i data-lucide="graduation-cap" class="w-4 h-4"></i></div>
+                        <select id="filter-course" onchange="renderFeed()" class="w-full pl-11 pr-10 py-3.5 bg-white border border-gray-100 rounded-2xl font-semibold text-gray-700 outline-none cursor-pointer appearance-none shadow-sm transition-all"><option value="All">Все курсы</option><option value="1">1 курс</option><option value="2">2 курс</option><option value="3">3 курс</option><option value="4">4 курс</option></select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400"><i data-lucide="chevron-down" class="w-4 h-4"></i></div>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Тип работы</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-apple-blue transition-colors"><i data-lucide="layers" class="w-4 h-4"></i></div>
+                        <select id="filter-type" onchange="renderFeed()" class="w-full pl-11 pr-10 py-3.5 bg-white border border-gray-100 rounded-2xl font-semibold text-gray-700 outline-none cursor-pointer appearance-none shadow-sm transition-all"><option value="All">Все типы</option><option value="ЛК">Лекция</option><option value="ЛР">Лабораторная</option><option value="РГР">РГР</option><option value="Курсовая">Курсовая</option></select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400"><i data-lucide="chevron-down" class="w-4 h-4"></i></div>
+                    </div>
+                </div>
+                <div>
+                     <button onclick="resetFeedFilters()" class="w-full py-4 rounded-2xl bg-gray-100 text-gray-500 font-bold text-xs uppercase tracking-widest hover:bg-gray-200 hover:text-black transition-all flex items-center justify-center gap-2 shadow-sm border border-transparent hover:border-gray-200">
+                        <i data-lucide="x-circle" class="w-4 h-4"></i> Сбросить
+                    </button>
+                </div>
+            </div>
+
+            <div id="feed-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-24"></div>
+        </div>
+
+        <div id="view-storage" class="view-section max-w-7xl mx-auto">
+            <div class="flex justify-between items-end mb-10">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-apple-text">📂 Мое хранилище</h1>
+                    <p class="text-gray-500 font-semibold mt-1 uppercase text-xs tracking-widest">Файлов: <span id="storage-count" class="text-apple-blue">0</span></p>
+                </div>
+                <button onclick="openFormModal()" class="flex items-center gap-2 bg-apple-blue text-white px-8 py-4 rounded-2xl font-bold text-sm uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-blue-100 active:scale-95">
+                    <i data-lucide="plus" class="w-5 h-5"></i> Добавить материал
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 items-end">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Предмет</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-apple-blue transition-colors"><i data-lucide="filter" class="w-4 h-4"></i></div>
+                        <select id="storage-filter-subject" onchange="renderStorage()" class="w-full pl-11 pr-10 py-3 bg-white border border-gray-100 rounded-xl font-semibold text-sm text-gray-700 outline-none cursor-pointer appearance-none shadow-sm transition-all"><option value="All">Все предметы</option></select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400"><i data-lucide="chevron-down" class="w-4 h-4"></i></div>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Тип работы</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-apple-blue transition-colors"><i data-lucide="layers" class="w-4 h-4"></i></div>
+                        <select id="storage-filter-type" onchange="renderStorage()" class="w-full pl-11 pr-10 py-3 bg-white border border-gray-100 rounded-xl font-semibold text-sm text-gray-700 outline-none cursor-pointer appearance-none shadow-sm transition-all"><option value="All">Все типы</option><option value="ЛК">Лекция</option><option value="ЛР">Лабораторная</option><option value="РГР">РГР</option><option value="Курсовая">Курсовая</option></select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400"><i data-lucide="chevron-down" class="w-4 h-4"></i></div>
+                    </div>
+                </div>
+                <div>
+                     <button onclick="resetStorageFilters()" class="w-full py-3.5 rounded-xl bg-gray-100 text-gray-500 font-bold text-sm uppercase tracking-widest hover:bg-gray-200 hover:text-black transition-all flex items-center justify-center gap-2 shadow-sm border border-transparent hover:border-gray-200">
+                        <i data-lucide="x-circle" class="w-5 h-5"></i> Сбросить фильтры
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="border-b border-gray-50 text-[10px] text-gray-400 font-bold uppercase tracking-[0.15em] bg-gray-50/50">
+                            <th class="px-8 py-6">Название материала</th>
+                            <th class="px-8 py-6">Предмет</th>
+                            <th class="px-8 py-6">Статус</th>
+                            <th class="px-8 py-6 text-right">Управление</th>
+                        </tr>
+                    </thead>
+                    <tbody id="storage-list" class="divide-y divide-gray-50"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-favorites" class="view-section max-w-7xl mx-auto">
+            <div class="mb-10">
+                <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-apple-text flex items-center gap-3">
+                    <i data-lucide="star" class="w-10 h-10 text-yellow-400 fill-current"></i>
+                    Избранное
+                </h1>
+                <p class="text-gray-500 font-medium mt-1">Ваши сохраненные материалы и предметы</p>
+            </div>
+            <div class="mb-12">
+                <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-4 ml-1">Избранные предметы</h3>
+                <div id="fav-categories-list" class="flex flex-wrap gap-3"></div>
+            </div>
+            <div>
+                <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-6 ml-1">Сохраненные материалы</h3>
+                <div id="fav-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-24"></div>
+            </div>
+        </div>
+
+        <div id="view-tasks" class="view-section max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-end gap-6 mb-10">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-apple-text flex items-center gap-3">
+                        <i data-lucide="check-circle-2" class="w-10 h-10 text-green-500 fill-green-50"></i>
+                        Задачи
+                    </h1>
+                    <p class="text-gray-500 font-medium mt-1">Управляйте дедлайнами и домашкой</p>
+                </div>
+                <button onclick="openTaskModal()" class="flex items-center gap-2 bg-black text-white px-8 py-4 rounded-2xl font-bold text-sm uppercase tracking-widest hover:bg-gray-800 transition-all shadow-xl active:scale-95">
+                    <i data-lucide="plus" class="w-5 h-5"></i> Новая задача
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-20">
+                <div>
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                        <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Горят дедлайны</h3>
+                        <span id="task-count-urgent" class="bg-red-100 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded-full ml-auto">0</span>
+                    </div>
+                    <div id="tasks-urgent-list" class="space-y-4"></div>
+                </div>
+
+                <div>
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                        <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Предстоящие</h3>
+                        <span id="task-count-upcoming" class="bg-blue-100 text-blue-600 text-[10px] font-bold px-2 py-0.5 rounded-full ml-auto">0</span>
+                    </div>
+                    <div id="tasks-upcoming-list" class="space-y-4"></div>
+                </div>
+
+                <div>
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                        <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Выполнено</h3>
+                        <span id="task-count-done" class="bg-green-100 text-green-600 text-[10px] font-bold px-2 py-0.5 rounded-full ml-auto">0</span>
+                    </div>
+                    <div id="tasks-done-list" class="space-y-4 opacity-60 hover:opacity-100 transition-opacity"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-settings" class="view-section max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100 flex flex-col items-center text-center h-full relative">
+                        <input type="file" id="avatar-upload" hidden accept="image/*" onchange="handleAvatarUpload(this)">
+                        <div onclick="document.getElementById('avatar-upload').click()" class="w-32 h-32 rounded-full bg-blue-50 flex items-center justify-center text-apple-blue font-bold text-5xl mb-4 shadow-inner cursor-pointer hover:ring-4 ring-blue-100 transition-all relative overflow-hidden group">
+                            <span id="set-card-avatar-text">S</span>
+                            <img id="set-card-avatar-img" src="" class="absolute inset-0 w-full h-full object-cover hidden">
+                            <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><i data-lucide="camera" class="text-white w-8 h-8"></i></div>
+                        </div>
+                        <h2 id="set-card-name" class="text-2xl font-bold text-gray-800 mb-1">Student User</h2>
+                        <p id="set-card-email" class="text-sm text-gray-400 font-medium mb-8">student@mai.ru</p>
+
+                        <div class="w-full space-y-3">
+                            <div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl">
+                                <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Загрузок</span>
+                                <span class="text-lg font-bold text-apple-blue">12</span>
+                            </div>
+                            <div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl">
+                                <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Рейтинг</span>
+                                <div class="flex items-center gap-1">
+                                    <span class="text-lg font-bold text-yellow-500">4.9</span>
+                                    <i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-current"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 space-y-8">
+
+                    <div class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100">
+                        <h3 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                            <i data-lucide="user" class="w-5 h-5 text-apple-blue"></i> Личная информация
+                        </h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Имя</label>
+                                <input id="set-user-name" type="text" class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-100 font-semibold text-gray-700">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Возраст</label>
+                                <input id="set-user-age" type="number" class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-100 font-semibold text-gray-700">
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">ВУЗ</label>
+                                <div class="relative">
+                                    <i data-lucide="landmark" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                                    <input id="set-user-uni" type="text" class="w-full pl-12 pr-5 py-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-100 font-semibold text-gray-700">
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Курс</label>
+                                <select id="set-user-course" class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-100 font-semibold text-gray-700 appearance-none cursor-pointer">
+                                    <option value="1">1 курс</option>
+                                    <option value="2">2 курс</option>
+                                    <option value="3">3 курс</option>
+                                    <option value="4">4 курс</option>
+                                </select>
+                            </div>
+
+                            <div class="md:col-span-2 space-y-1">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">О себе</label>
+                                <textarea id="set-user-bio" rows="3" class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-100 font-medium text-gray-700 resize-none"></textarea>
+                            </div>
+
+                             <div class="space-y-1">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Email</label>
+                                <input id="set-user-email" type="text" class="w-full px-5 py-4 bg-gray-100 border-none rounded-2xl outline-none text-gray-400 font-semibold cursor-not-allowed" readonly>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Telegram</label>
+                                <div class="relative">
+                                    <i data-lucide="message-circle" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-apple-blue"></i>
+                                    <input id="set-user-tg" type="text" class="w-full pl-12 pr-5 py-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-100 font-semibold text-gray-700 text-apple-blue">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100">
+                        <h3 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                            <i data-lucide="shield" class="w-5 h-5 text-green-500"></i> Настройки приватности
+                        </h3>
+                        <div class="space-y-6">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-bold text-gray-700">Показывать Email</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer settings-toggle" id="toggle-email">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all toggle-dot transition-colors duration-300"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-bold text-gray-700">Показывать блок "О себе"</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer settings-toggle" id="toggle-bio" checked>
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all toggle-dot transition-colors duration-300"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-bold text-gray-700">Показывать Курс и ВУЗ</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer settings-toggle" id="toggle-uni" checked>
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all toggle-dot transition-colors duration-300"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-bold text-gray-700">Показывать Telegram</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer settings-toggle" id="toggle-tg" checked>
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all toggle-dot transition-colors duration-300"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button onclick="saveSettings()" class="bg-black text-white px-12 py-4 rounded-2xl font-bold text-sm uppercase tracking-widest shadow-xl hover:bg-gray-800 active:scale-95 transition-all w-full md:w-auto">
+                            Сохранить изменения
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="modal-detail" class="fixed inset-0 z-[100] flex items-center justify-center p-4 modal-backdrop bg-black/40 backdrop-blur-md modal-hidden">
+        <div class="absolute inset-0" onclick="closeModal('modal-detail')"></div>
+        <div class="relative bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[95vh] modal-content">
+            <button onclick="closeModal('modal-detail')" class="absolute top-6 right-6 z-30 bg-white/80 backdrop-blur-sm p-2 rounded-full text-gray-400 hover:text-black shadow-sm transition-all"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <div class="overflow-y-auto custom-scrollbar">
+                <div class="p-10 pb-6 border-b border-gray-50">
+                    <div class="flex gap-2 mb-6">
+                        <span id="md-cat" class="px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-gray-50 text-gray-500 border border-gray-100 shadow-sm"></span>
+                        <span class="px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-gray-50 text-gray-400 border border-gray-100 flex items-center gap-1.5"><i data-lucide="calendar" class="w-3 h-3 transition-none"></i> <span id="md-date"></span></span>
+                    </div>
+                    <h2 id="md-title" class="text-3xl font-bold text-apple-text tracking-tight leading-tight mb-6"></h2>
+                    <div class="flex items-center gap-3 cursor-pointer group" id="md-author-trigger">
+                        <div id="md-author-avatar" class="w-12 h-12 rounded-full bg-apple-blue flex items-center justify-center text-white font-bold text-sm shadow-lg ring-4 ring-white transition-none"></div>
+                        <div class="text-left">
+                            <p id="md-author-name" class="text-base font-bold text-gray-800 leading-none mb-1 group-hover:text-apple-blue transition-colors underline underline-offset-4 decoration-gray-200"></p>
+                            <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Студент • Рейтинг 4.9</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-10 space-y-10">
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="flex flex-col items-center justify-center p-6 rounded-3xl bg-gray-50/50 border border-gray-100">
+                            <div class="flex items-center gap-2 mb-1.5 text-gray-400"><i data-lucide="heart" class="w-4 h-4 transition-none"></i><span class="text-[10px] font-bold uppercase tracking-widest">Лайки</span></div>
+                            <span id="md-likes-stat" class="text-2xl font-bold text-gray-800"></span>
+                        </div>
+                        <div class="flex flex-col items-center justify-center p-6 rounded-3xl bg-gray-50/50 border border-gray-100">
+                            <div class="flex items-center gap-2 mb-1.5 text-gray-400"><i data-lucide="download" class="w-4 h-4 transition-none"></i><span class="text-[10px] font-bold uppercase tracking-widest">Скачивания</span></div>
+                            <span class="text-2xl font-bold text-gray-800">154</span>
+                        </div>
+                        <div class="flex flex-col items-center justify-center p-6 rounded-3xl bg-gray-50/50 border border-gray-100">
+                            <div class="flex items-center gap-2 mb-1.5 text-gray-400"><i data-lucide="eye" class="w-4 h-4 transition-none"></i><span class="text-[10px] font-bold uppercase tracking-widest">Просмотры</span></div>
+                            <span class="text-2xl font-bold text-gray-800">320</span>
+                        </div>
+                    </div>
+                    <div id="md-ai-container"></div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2"><i data-lucide="info" class="w-5 h-5 text-gray-300 transition-none"></i> Описание от автора</h3>
+                        <p id="md-desc" class="text-gray-500 leading-relaxed text-base font-medium"></p>
+                    </div>
+                    <div id="md-file-card-container"></div>
+                </div>
+            </div>
+
+            <div class="p-8 border-t border-gray-100 bg-white flex items-center justify-between gap-4 z-20 shadow-[0_-10px_25px_rgba(0,0,0,0.02)]">
+                <button onclick="handleShare(event)" id="share-btn" class="p-4 rounded-2xl border border-gray-200 text-gray-500 transition-all active:scale-90 shadow-sm flex items-center justify-center">
+                    <i data-lucide="share-2" id="share-icon" class="w-6 h-6 transition-none"></i>
+                    <i data-lucide="check" id="check-icon" class="w-6 h-6 text-green-500 hidden transition-none"></i>
+                </button>
+                <a id="md-download-link" href="#" download class="flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl bg-[#1D1D1F] text-white font-bold text-sm uppercase tracking-widest shadow-xl hover:bg-black transition-all active:scale-95">
+                    <i data-lucide="download" class="w-5 h-5 transition-none"></i> Скачать файл
+                </a>
+                <div class="flex gap-2">
+                    <button id="md-like-btn" class="flex items-center gap-2 px-6 py-4 rounded-2xl border border-gray-100 font-bold text-sm transition-all active:scale-90 shadow-sm"></button>
+                    <button id="md-fav-btn" class="p-4 rounded-2xl border border-gray-100 transition-all active:scale-90 shadow-sm"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-form" class="fixed inset-0 z-[130] flex items-center justify-center p-4 modal-backdrop bg-black/30 backdrop-blur-sm modal-hidden">
+        <div class="absolute inset-0" onclick="closeModal('modal-form')"></div>
+        <div class="relative bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col modal-content">
+            <button onclick="closeModal('modal-form')" class="absolute top-6 right-6 z-20 text-gray-400 hover:text-black p-2 rounded-full hover:bg-gray-100 transition-all"><i data-lucide="x"></i></button>
+            <div class="overflow-y-auto custom-scrollbar p-10">
+                <h2 id="mf-head" class="text-2xl font-bold mb-8 tracking-tight uppercase">Загрузка материала</h2>
+                <form onsubmit="handleFormSubmit(event)" class="space-y-5">
+                    <input type="hidden" id="mf-id">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Название материала</label>
+                        <input id="mf-name" type="text" placeholder="Напр: Теорема Байеса" class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-100 font-semibold" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Предмет</label>
+                            <input id="mf-cat" type="text" placeholder="Физика" class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-100 font-semibold" required>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Курс</label>
+                            <select id="mf-course" class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl outline-none font-semibold cursor-pointer appearance-none bg-white">
+                                <option value="1">1 курс</option><option value="2">2 курс</option><option value="3">3 курс</option><option value="4">4 курс</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Тип работы</label>
+                        <select id="mf-type" class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl outline-none font-semibold cursor-pointer bg-white">
+                            <option value="ЛК">Лекция (ЛК)</option><option value="ЛР">Лаба (ЛР)</option><option value="ПЗ">Семинар (ПЗ)</option><option value="Шпора">Шпаргалка</option><option value="РГР">РГР</option><option value="Курсовая">Курсовая</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Описание</label>
+                        <textarea id="mf-desc" rows="3" placeholder="Краткое содержание..." class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-100 font-medium resize-none"></textarea>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Файлы</label>
+                        <div onclick="document.getElementById('mf-file').click()" class="border-2 border-dashed border-gray-200 rounded-3xl p-8 text-center hover:bg-gray-50 hover:border-blue-200 transition-all cursor-pointer group flex flex-col items-center gap-3">
+                            <input type="file" id="mf-file" class="hidden" multiple onchange="handleFileSelect(this)">
+                            <div class="p-3 bg-white border border-gray-100 text-apple-blue rounded-2xl shadow-sm group-hover:scale-110 transition-transform">
+                                <i data-lucide="cloud-upload" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-gray-700">Нажмите для выбора нового файла</p>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">PDF, DOCX, PPTX (ДО 20МБ)</p>
+                            </div>
+                        </div>
+                        <div id="file-list-container" class="space-y-3 mt-4"></div>
+                    </div>
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl cursor-pointer hover:bg-gray-100 transition-all" onclick="toggleFormPrivate()">
+                        <div class="flex items-center gap-3">
+                            <div id="mf-lock-icon" class="p-2 bg-white rounded-xl shadow-sm text-gray-400 transition-colors"><i data-lucide="lock" class="w-5 h-5"></i></div>
+                            <div>
+                                <div class="text-xs font-bold text-gray-700 uppercase tracking-widest">Личный архив</div>
+                                <div class="text-[10px] text-gray-400 font-semibold uppercase tracking-tight">Файл не будет виден другим</div>
+                            </div>
+                        </div>
+                        <input type="checkbox" id="mf-private-check" class="hidden">
+                        <div id="mf-switch-bg" class="w-12 h-6 bg-gray-300 rounded-full p-1 transition-all duration-300 flex items-center">
+                            <div id="mf-switch-dot" class="w-4 h-4 bg-white rounded-full shadow-md transform transition-all duration-300 translate-x-0"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center mt-10 pt-4 border-t border-gray-50">
+                        <button type="button" id="mf-delete-btn" onclick="handleDeleteCurrent()" class="hidden p-3 rounded-xl text-red-500 hover:bg-red-50 transition-all"><i data-lucide="trash-2"></i></button>
+                        <div class="flex gap-3 ml-auto">
+                            <button type="button" onclick="closeModal('modal-form')" class="px-8 py-4 rounded-2xl text-gray-400 font-bold text-[10px] uppercase tracking-widest hover:text-gray-900 transition-all">Отмена</button>
+                            <button type="submit" class="bg-black text-white px-10 py-4 rounded-2xl font-bold text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-all">Сохранить</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-task" class="fixed inset-0 z-[130] flex items-center justify-center p-4 modal-backdrop bg-black/30 backdrop-blur-sm modal-hidden">
+        <div class="absolute inset-0" onclick="closeModal('modal-task')"></div>
+        <div class="relative bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden flex flex-col modal-content">
+            <button onclick="closeModal('modal-task')" class="absolute top-6 right-6 z-20 text-gray-400 hover:text-black p-2 rounded-full hover:bg-gray-100 transition-all"><i data-lucide="x"></i></button>
+            <div class="overflow-y-auto custom-scrollbar p-10">
+                <h2 id="mt-head" class="text-2xl font-bold mb-8 tracking-tight uppercase">Новая задача</h2>
+                <form onsubmit="handleTaskSubmit(event)" class="space-y-5">
+                    <input type="hidden" id="mt-id">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Задача</label>
+                        <input id="mt-text" type="text" placeholder="Напр: Сдать лабу по физике" class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-100 font-semibold" required>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Предмет</label>
+                        <input id="mt-subj" type="text" placeholder="Физика" class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-100 font-semibold">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Дата</label>
+                            <input id="mt-date-part" type="date" class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-100 font-semibold text-gray-600">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Время</label>
+                            <input id="mt-time-part" type="time" class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-100 font-semibold text-gray-600">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 bg-red-50 rounded-2xl cursor-pointer hover:bg-red-100 transition-all" onclick="toggleTaskUrgent()">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-white rounded-xl shadow-sm text-red-500"><i data-lucide="flame" class="w-5 h-5"></i></div>
+                            <div>
+                                <div class="text-xs font-bold text-gray-700 uppercase tracking-widest">Срочно</div>
+                                <div class="text-[10px] text-gray-400 font-semibold uppercase tracking-tight">Пометить как горящий дедлайн</div>
+                            </div>
+                        </div>
+                        <input type="checkbox" id="mt-urgent-check" class="hidden">
+                        <div id="mt-switch-bg" class="w-12 h-6 bg-gray-300 rounded-full p-1 transition-all duration-300 flex items-center">
+                            <div id="mt-switch-dot" class="w-4 h-4 bg-white rounded-full shadow-md transform transition-all duration-300 translate-x-0"></div>
+                        </div>
+                    </div>
+                    <div class="pt-4 border-t border-gray-50 flex justify-between items-center">
+                        <button type="button" id="mt-delete-btn" onclick="handleDeleteTaskCurrent()" class="hidden p-3 rounded-xl text-red-500 hover:bg-red-50 transition-all"><i data-lucide="trash-2"></i></button>
+                        <button id="mt-submit-btn" type="submit" class="bg-black text-white px-10 py-4 rounded-2xl font-bold text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-all ml-auto">Добавить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-profile" class="fixed inset-0 z-[120] flex items-center justify-center p-4 modal-backdrop bg-black/40 backdrop-blur-md modal-hidden">
+        <div class="absolute inset-0" onclick="closeModal('modal-profile')"></div>
+        <div class="relative bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden flex flex-col modal-content">
+            <button onclick="closeModal('modal-profile')" class="absolute top-5 right-5 z-20 text-gray-400 hover:text-black bg-white/50 backdrop-blur-sm p-2 rounded-full shadow-sm"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <div class="pt-12 pb-8 px-10 flex flex-col items-center text-center">
+                <div class="w-32 h-32 rounded-full bg-white p-1 shadow-xl mb-6 relative ring-1 ring-gray-100 flex items-center justify-center overflow-hidden">
+                    <div id="up-avatar" class="w-full h-full bg-gradient-to-tr from-blue-50 to-blue-100 flex items-center justify-center text-apple-blue font-bold text-5xl absolute inset-0">S</div>
+                    <img id="up-avatar-img" src="" class="absolute inset-0 w-full h-full object-cover hidden">
+                </div>
+                <h2 id="up-name" class="text-3xl font-bold text-gray-900 mb-1 leading-tight tracking-tight"></h2>
+                <p id="up-uni" class="text-sm text-gray-400 font-semibold uppercase tracking-widest"></p>
+                <div class="flex items-center justify-center gap-10 mt-8 w-full">
+                    <div class="text-center"><span class="block text-2xl font-bold text-gray-900">12</span><span class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Загрузок</span></div>
+                    <div class="w-px h-10 bg-gray-100"></div>
+                    <div class="text-center"><div class="flex items-center justify-center gap-1"><span class="text-2xl font-bold text-gray-900">4.9</span><i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current mb-0.5 transition-none"></i></div><span class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Рейтинг</span></div>
+                </div>
+            </div>
+            <div class="px-10 pb-10 space-y-6">
+                <div class="bg-gray-50/80 rounded-[2rem] p-6 text-sm text-gray-600 leading-relaxed text-center italic font-medium">"<span id="up-bio"></span>"</div>
+                <div class="space-y-4">
+                    <div class="flex items-center gap-4 group">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-apple-blue shadow-sm ring-1 ring-blue-100/50 transition-none"><i data-lucide="graduation-cap" class="w-6 h-6 transition-none"></i></div>
+                        <div><p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Курс</p><p id="up-course" class="font-bold text-gray-800 text-lg"></p></div>
+                    </div>
+                    <div class="flex items-center gap-4 group">
+                        <div class="w-12 h-12 rounded-2xl bg-sky-50 flex items-center justify-center text-sky-500 shadow-sm ring-1 ring-sky-100/50 transition-none"><i data-lucide="message-circle" class="w-6 h-6 transition-none"></i></div>
+                        <div><p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Telegram</p><a id="up-tg" href="#" class="font-bold text-apple-blue text-lg hover:underline tracking-tight transition-all"></a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const state = {
+            user: {
+                name: "Алексей Смирнов",
+                id: 1,
+                university: "МАИ",
+                bio: "Студент 3 курса, кафедра 806. Увлекаюсь AI.",
+                course: "3",
+                telegram: "@alex_dev",
+                email: "student@mai.ru",
+                age: 20,
+                avatarUrl: null,
+                privacy: { email: false, bio: true, uni: true, tg: true }
+            },
+            favoriteCategories: ["ФИЗИКА"],
+            materials: [
+                { id: 1, title: "Введение в Квантовую Механику", author: "Алексей Петров", authorId: 2, category: "ФИЗИКА", date: "25.10.2023", type: "ЛК", course: 2, likes: 45, isLiked: false, isFav: true, ai: "Ключевые понятия: Дуализм, уравнение Шрёдингера.", desc: "Лекционные заметки.", file: "physics_1.pdf", isPrivate: false },
+                { id: 2, title: "Алгоритмы и Структуры Данных", author: "Мария Иванова", authorId: 3, category: "ИНФОРМАТИКА", date: "23.10.2023", type: "РГР", course: 2, likes: 124, isLiked: true, isFav: true, ai: null, desc: "Справочник по алгоритмам.", file: "algo_struct.pdf", isPrivate: false },
+                { id: 3, title: "Лабораторная №3 по схемотехнике", author: "Дмитрий С.", authorId: 4, category: "ИНФОРМАТИКА", date: "28.10.2023", type: "ЛР", course: 3, likes: 10, isLiked: false, isFav: false, ai: null, desc: "Исследование логических элементов.", file: "lab_3.pdf", isPrivate: false },
+                { id: 4, title: "Мой проект по физике", author: "Алексей Смирнов", authorId: 1, category: "ФИЗИКА", date: "15.12.2023", type: "РГР", course: 3, likes: 0, isLiked: false, isFav: false, ai: null, desc: "Черновик личного проекта.", file: "my_project.pdf", isPrivate: true }
+            ],
+            // ЗАДАЧИ: Формат ISO для корректной сортировки
+            tasks: [
+                { id: 10, text: "Сдать курсовую по физике", date: "2025-12-20T14:00", urgent: true, done: false, subject: "Физика" },
+                { id: 11, text: "Лабораторная работа", date: "2025-12-21T10:00", urgent: true, done: false, subject: "Информатика" },
+                { id: 12, text: "Подготовить доклад", date: "2025-12-25T18:30", urgent: false, done: false, subject: "История" },
+                { id: 13, text: "Решить задачи", date: "2023-11-15T09:00", urgent: false, done: true, subject: "Мат. анализ" }
+            ],
+            expandedAI: [],
+            currentMaterialId: null,
+            selectedFiles: []
+        };
+
+        state.materials.forEach(m => m.aiStatus = m.ai ? 'ready' : 'none');
+
+        window.onload = () => { renderSidebar(); renderFeed(); renderStorage(); renderTasks(); lucide.createIcons(); };
+
+        function renderAllUI() {
+            renderSidebar(); renderFeed(); renderStorage(); renderTasks();
+            if (document.getElementById('view-favorites').classList.contains('active')) renderFavorites();
+            if(document.getElementById('modal-detail').classList.contains('modal-visible') && state.currentMaterialId) openDetail(state.currentMaterialId);
+            lucide.createIcons();
+        }
+
+        // --- AVATAR & SETTINGS ---
+        function handleAvatarUpload(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    state.user.avatarUrl = e.target.result;
+                    renderSidebar();
+                    initSettingsFields();
+
+                    const upAvatar = document.getElementById('up-avatar');
+                    const upImg = document.getElementById('up-avatar-img');
+                    if (upAvatar && upImg) {
+                        upAvatar.classList.add('hidden');
+                        upImg.src = state.user.avatarUrl;
+                        upImg.classList.remove('hidden');
+                    }
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function initSettingsFields() {
+            document.getElementById('set-card-name').innerText = state.user.name;
+            document.getElementById('set-card-email').innerText = state.user.email;
+
+            const cardAvatarText = document.getElementById('set-card-avatar-text');
+            const cardAvatarImg = document.getElementById('set-card-avatar-img');
+
+            if (state.user.avatarUrl) {
+                cardAvatarText.classList.add('hidden');
+                cardAvatarImg.src = state.user.avatarUrl;
+                cardAvatarImg.classList.remove('hidden');
+            } else {
+                cardAvatarText.innerText = state.user.name.charAt(0);
+                cardAvatarText.classList.remove('hidden');
+                cardAvatarImg.classList.add('hidden');
+            }
+
+            document.getElementById('set-user-name').value = state.user.name;
+            document.getElementById('set-user-age').value = state.user.age || "";
+            document.getElementById('set-user-uni').value = state.user.university;
+            document.getElementById('set-user-course').value = state.user.course;
+            document.getElementById('set-user-bio').value = state.user.bio;
+            document.getElementById('set-user-email').value = state.user.email;
+            document.getElementById('set-user-tg').value = state.user.telegram;
+
+            document.getElementById('toggle-email').checked = state.user.privacy.email;
+            document.getElementById('toggle-bio').checked = state.user.privacy.bio;
+            document.getElementById('toggle-uni').checked = state.user.privacy.uni;
+            document.getElementById('toggle-tg').checked = state.user.privacy.tg;
+        }
+
+        function saveSettings() {
+            state.user.name = document.getElementById('set-user-name').value;
+            state.user.age = document.getElementById('set-user-age').value;
+            state.user.university = document.getElementById('set-user-uni').value;
+            state.user.course = document.getElementById('set-user-course').value;
+            state.user.bio = document.getElementById('set-user-bio').value;
+            state.user.telegram = document.getElementById('set-user-tg').value;
+
+            state.user.privacy.email = document.getElementById('toggle-email').checked;
+            state.user.privacy.bio = document.getElementById('toggle-bio').checked;
+            state.user.privacy.uni = document.getElementById('toggle-uni').checked;
+            state.user.privacy.tg = document.getElementById('toggle-tg').checked;
+
+            renderSidebar();
+            initSettingsFields();
+            alert("Настройки сохранены!");
+        }
+
+        // --- TASKS LOGIC ---
+        function formatTaskDate(isoString) {
+            if(!isoString || isoString === "Без даты") return "Без даты";
+            const date = new Date(isoString);
+            if (isNaN(date.getTime())) return isoString;
+            return date.toLocaleString('ru-RU', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function renderTasks() {
+            const urgentList = document.getElementById('tasks-urgent-list');
+            const upcomingList = document.getElementById('tasks-upcoming-list');
+            const doneList = document.getElementById('tasks-done-list');
+
+            const sortByDate = (a, b) => {
+                if (!a.date) return 1; if (!b.date) return -1;
+                return new Date(a.date) - new Date(b.date);
+            };
+
+            const urgentT = state.tasks.filter(t => !t.done && t.urgent).sort(sortByDate);
+            const upcomingT = state.tasks.filter(t => !t.done && !t.urgent).sort(sortByDate);
+            const doneT = state.tasks.filter(t => t.done).sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            document.getElementById('task-count-urgent').innerText = urgentT.length;
+            document.getElementById('task-count-upcoming').innerText = upcomingT.length;
+            document.getElementById('task-count-done').innerText = doneT.length;
+
+            const createCard = (t) => `
+                <div onclick="openEditTaskModal(${t.id})" class="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all flex items-start gap-4 group cursor-pointer">
+                    <label class="relative flex items-center justify-center cursor-pointer mt-1" onclick="event.stopPropagation()">
+                        <input type="checkbox" class="task-checkbox hidden" ${t.done ? 'checked' : ''} onchange="toggleTaskDone(${t.id})">
+                        <div class="w-6 h-6 rounded-lg border-2 border-gray-200 transition-all flex items-center justify-center text-white">
+                            <svg class="w-4 h-4 hidden pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                    </label>
+                    <div class="flex-1">
+                        <p class="font-bold text-gray-800 text-sm leading-tight ${t.done ? 'line-through text-gray-400' : ''}">${t.text}</p>
+                        <div class="flex items-center gap-2 mt-2">
+                            ${t.subject ? `<span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-2 py-1 rounded-lg border border-gray-100">${t.subject}</span>` : ''}
+                            <span class="text-[10px] font-bold ${t.urgent && !t.done ? 'text-red-500' : 'text-gray-400'} uppercase tracking-widest flex items-center gap-1">
+                                ${t.urgent && !t.done ? '<i data-lucide="flame" class="w-3 h-3 fill-current"></i>' : '<i data-lucide="calendar" class="w-3 h-3"></i>'} ${formatTaskDate(t.date)}
+                            </span>
+                        </div>
+                    </div>
+                    <button onclick="event.stopPropagation(); deleteTask(${t.id})" class="text-gray-300 hover:text-red-500 hover:bg-red-50 p-2 rounded-xl transition-all opacity-0 group-hover:opacity-100"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            `;
+
+            urgentList.innerHTML = urgentT.length ? urgentT.map(createCard).join('') : `<p class="text-xs text-gray-400 text-center py-4">Нет срочных задач</p>`;
+            upcomingList.innerHTML = upcomingT.length ? upcomingT.map(createCard).join('') : `<p class="text-xs text-gray-400 text-center py-4">Нет задач</p>`;
+            doneList.innerHTML = doneT.length ? doneT.map(createCard).join('') : `<p class="text-xs text-gray-400 text-center py-4">Список пуст</p>`;
+
+            const badge = document.getElementById('tasks-badge');
+            if(urgentT.length > 0) { badge.innerText = urgentT.length; badge.classList.remove('hidden'); } else badge.classList.add('hidden');
+
+            const sideList = document.getElementById('urgent-tasks-list');
+            const sideSection = document.getElementById('urgent-section');
+            if (urgentT.length > 0) {
+                sideSection.classList.remove('hidden');
+                sideList.innerHTML = urgentT.slice(0, 3).map(t => `<div onclick="switchView('tasks')" class="w-full p-3 rounded-2xl bg-red-50 border border-red-100 cursor-pointer transition-all hover:bg-red-100"><p class="text-[12px] font-bold text-gray-800 line-clamp-1">${t.text}</p></div>`).join('');
+            } else sideSection.classList.add('hidden');
+
+            lucide.createIcons();
+        }
+
+        function toggleTaskDone(id) {
+            const task = state.tasks.find(t => t.id === id);
+            if(task) { task.done = !task.done; renderAllUI(); }
+        }
+
+        function deleteTask(id) {
+            if(confirm("Удалить задачу?")) { state.tasks = state.tasks.filter(t => t.id !== id); renderAllUI(); }
+        }
+
+        function handleDeleteTaskCurrent() {
+            const id = document.getElementById('mt-id').value;
+            if (id) { deleteTask(parseInt(id)); closeModal('modal-task'); }
+        }
+
+        function openTaskModal() {
+            document.querySelector('#modal-task form').reset();
+            document.getElementById('mt-head').innerText = "Новая задача";
+            document.getElementById('mt-submit-btn').innerText = "Добавить";
+            document.getElementById('mt-id').value = "";
+            document.getElementById('mt-delete-btn').classList.add('hidden');
+
+            document.getElementById('mt-date-part').value = "";
+            document.getElementById('mt-time-part').value = "";
+
+            setTaskUrgent(false);
+            openModal('modal-task');
+        }
+
+        function openEditTaskModal(id) {
+            const t = state.tasks.find(x => x.id === id);
+            if(!t) return;
+
+            document.getElementById('mt-head').innerText = "Редактирование задачи";
+            document.getElementById('mt-submit-btn').innerText = "Сохранить";
+            document.getElementById('mt-id').value = t.id;
+            document.getElementById('mt-text').value = t.text;
+            document.getElementById('mt-subj').value = t.subject || "";
+
+            if(t.date && t.date.includes('T')) {
+                const parts = t.date.split('T');
+                document.getElementById('mt-date-part').value = parts[0];
+                document.getElementById('mt-time-part').value = parts[1];
+            } else {
+                document.getElementById('mt-date-part').value = "";
+                document.getElementById('mt-time-part').value = "";
+            }
+
+            document.getElementById('mt-delete-btn').classList.remove('hidden');
+            setTaskUrgent(t.urgent);
+            openModal('modal-task');
+        }
+
+        function toggleTaskUrgent() {
+            const check = document.getElementById('mt-urgent-check');
+            setTaskUrgent(!check.checked);
+        }
+
+        function setTaskUrgent(isUrgent) {
+            const check = document.getElementById('mt-urgent-check');
+            const bg = document.getElementById('mt-switch-bg');
+            const dot = document.getElementById('mt-switch-dot');
+            check.checked = isUrgent;
+            if(isUrgent) { bg.classList.replace('bg-gray-300', 'bg-red-500'); dot.classList.replace('translate-x-0', 'translate-x-6'); }
+            else { bg.classList.replace('bg-red-500', 'bg-gray-300'); dot.classList.replace('translate-x-6', 'translate-x-0'); }
+        }
+
+        function handleTaskSubmit(e) {
+            e.preventDefault();
+            const idStr = document.getElementById('mt-id').value;
+
+            const datePart = document.getElementById('mt-date-part').value;
+            const timePart = document.getElementById('mt-time-part').value;
+            let finalDate = "";
+
+            if(datePart) {
+                finalDate = datePart;
+                if(timePart) finalDate += `T${timePart}`;
+                else finalDate += `T00:00`;
+            }
+
+            const data = {
+                text: document.getElementById('mt-text').value,
+                subject: document.getElementById('mt-subj').value,
+                date: finalDate,
+                urgent: document.getElementById('mt-urgent-check').checked
+            };
+
+            if(idStr) {
+                const t = state.tasks.find(x => x.id == idStr);
+                if(t) Object.assign(t, data);
+            } else {
+                state.tasks.unshift({ ...data, id: Date.now(), done: false });
+            }
+            closeModal('modal-task');
+            renderAllUI();
+        }
+
+        // === ОСТАЛЬНЫЕ ФУНКЦИИ (БЕЗ ИЗМЕНЕНИЙ) ===
+        function handleShare(event) { if(event) event.stopPropagation(); navigator.clipboard.writeText(window.location.href).then(() => { const sIcon = document.getElementById('share-icon'), cIcon = document.getElementById('check-icon'), btn = document.getElementById('share-btn'); sIcon.classList.add('hidden'); cIcon.classList.remove('hidden'); btn.classList.add('bg-green-50', 'border-green-200'); setTimeout(() => { sIcon.classList.remove('hidden'); cIcon.classList.add('hidden'); btn.classList.remove('bg-green-50', 'border-green-200'); }, 2000); }); }
+        function toggleAISummary(id, event) { if(event) event.stopPropagation(); const idx = state.expandedAI.indexOf(id); if(idx > -1) state.expandedAI.splice(idx, 1); else state.expandedAI.push(id); renderFeed(); if(document.getElementById('view-favorites').classList.contains('active')) renderFavorites(); }
+        function generateAI(id, event) { if(event) event.stopPropagation(); const m = state.materials.find(x => x.id === id); m.aiStatus = 'loading'; renderAllUI(); setTimeout(() => { m.ai = "Анализ завершен успешно."; m.aiStatus = 'ready'; state.expandedAI.push(id); renderAllUI(); }, 2000); }
+        function resetFeedFilters() { document.getElementById('filter-subject').value = 'All'; document.getElementById('filter-course').value = 'All'; document.getElementById('filter-type').value = 'All'; renderFeed(); }
+        function switchView(id) {
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.getElementById('view-' + id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            document.getElementById('nav-' + id).classList.add('active');
+            if(id === 'tasks') renderTasks();
+            if(id === 'favorites') renderFavorites();
+            if(id === 'settings') initSettingsFields();
+            lucide.createIcons();
+        }
+        function openModal(id) { document.getElementById(id).classList.replace('modal-hidden', 'modal-visible'); document.body.style.overflow = 'hidden'; lucide.createIcons(); }
+        function closeModal(id) { document.getElementById(id).classList.replace('modal-visible', 'modal-hidden'); document.body.style.overflow = ''; }
+        function renderSidebar() {
+            document.getElementById('sb-user-name').innerText = state.user.name;
+
+            const sbText = document.getElementById('sb-avatar-text');
+            const sbImg = document.getElementById('sb-avatar-img');
+
+            if(state.user.avatarUrl) {
+                sbText.classList.add('hidden');
+                sbImg.src = state.user.avatarUrl;
+                sbImg.classList.remove('hidden');
+            } else {
+                sbText.innerText = state.user.name.charAt(0);
+                sbText.classList.remove('hidden');
+                sbImg.classList.add('hidden');
+            }
+
+            const urgentT = state.tasks.filter(t => t.urgent);
+            const badge = document.getElementById('tasks-badge');
+            if(urgentT.length > 0) { badge.innerText = urgentT.length; badge.classList.remove('hidden'); } else badge.classList.add('hidden');
+            const list = document.getElementById('urgent-tasks-list');
+            if (urgentT.length > 0) { document.getElementById('urgent-section').classList.remove('hidden'); list.innerHTML = urgentT.slice(0, 3).map(t => `<div onclick="switchView('tasks')" class="w-full p-3 rounded-2xl bg-red-50 border border-red-100 cursor-pointer transition-all hover:bg-red-100"><p class="text-[12px] font-bold text-gray-800 line-clamp-1">${t.text}</p></div>`).join(''); } else document.getElementById('urgent-section').classList.add('hidden');
+        }
+        function openUserProfile(id) { const isMe = id === state.user.id; const u = isMe ? state.user : { name: "Алексей Петров", university: "Технический ВУЗ", bio: "Увлеченный студент.", course: "2", telegram: "@author_tg" }; document.getElementById('up-avatar').innerText = u.name.charAt(0); document.getElementById('up-name').innerText = u.name; document.getElementById('up-uni').innerText = u.university; document.getElementById('up-bio').innerText = u.bio; document.getElementById('up-course').innerText = u.course + "-й курс"; document.getElementById('up-tg').innerText = u.telegram; document.getElementById('up-tg').href = "https://t.me/" + u.telegram.replace('@',''); openModal('modal-profile'); }
+        function renderStorage() { const list = document.getElementById('storage-list'); const subjF = document.getElementById('storage-filter-subject').value; const typeF = document.getElementById('storage-filter-type').value; const subjSelect = document.getElementById('storage-filter-subject'); if (subjSelect.options.length === 1) { [...new Set(state.materials.map(m => m.category))].sort().forEach(c => subjSelect.add(new Option(c, c))); } const myFiles = state.materials.filter(m => { const isMine = m.authorId === state.user.id; const matchSubj = subjF === 'All' || m.category === subjF; const matchType = typeF === 'All' || m.type === typeF; return isMine && matchSubj && matchType; }); document.getElementById('storage-count').innerText = myFiles.length; if (myFiles.length === 0) { list.innerHTML = `<tr><td colspan="4" class="px-8 py-20 text-center text-gray-400 font-semibold uppercase tracking-widest text-xs">Нет файлов по заданным фильтрам</td></tr>`; return; } list.innerHTML = myFiles.map(m => `<tr class="hover:bg-gray-50/80 cursor-pointer transition-all group" onclick="openEditModal(${m.id})"><td class="px-8 py-6"><div class="flex items-center gap-4"><div class="p-3 bg-blue-50 text-apple-blue rounded-2xl group-hover:scale-105 transition-transform"><i data-lucide="file-text" class="w-6 h-6"></i></div><div><p class="font-bold text-apple-text tracking-tight">${m.title}</p><p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">${m.date} • ${m.type}</p></div></div></td><td class="px-8 py-6"><span class="px-3 py-1 bg-gray-100 rounded-lg text-[10px] font-bold text-gray-500 uppercase tracking-widest">${m.category}</span></td><td class="px-8 py-6">${m.isPrivate ? '<div class="flex items-center gap-2"><i data-lucide="lock" class="w-4 h-4 text-amber-500"></i><span class="text-xs text-gray-400 font-medium">Личное</span></div>' : '<div class="flex items-center gap-2"><i data-lucide="globe" class="w-4 h-4 text-green-500"></i><span class="text-xs text-gray-400 font-medium">Публичное</span></div>'}</td><td class="px-8 py-6 text-right"><div class="flex justify-end gap-2"><a href="/static/${m.file}" download onclick="event.stopPropagation()" class="p-2.5 bg-gray-50 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all" title="Скачать: ${m.file}"><i data-lucide="download" class="w-4 h-4"></i></a><button onclick="event.stopPropagation(); openEditModal(${m.id})" class="p-2.5 bg-gray-50 text-gray-400 hover:text-apple-blue hover:bg-white hover:shadow-sm rounded-xl transition-all" title="Редактировать"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button onclick="event.stopPropagation(); deleteMaterial(${m.id})" class="p-2.5 bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all" title="Удалить"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td></tr>`).join(''); lucide.createIcons(); }
+        function resetStorageFilters() { document.getElementById('storage-filter-subject').value = 'All'; document.getElementById('storage-filter-type').value = 'All'; renderStorage(); }
+        function openFormModal() { document.getElementById('mf-head').innerText = "Загрузка материала"; document.getElementById('mf-id').value = ""; document.getElementById('mf-delete-btn').classList.add('hidden'); document.querySelector('#modal-form form').reset(); state.selectedFiles = []; renderFileList(); setFormPrivate(false); openModal('modal-form'); }
+        function openEditModal(id) { const m = state.materials.find(x => x.id === id); if (!m) return; document.getElementById('mf-head').innerText = "Редактирование"; document.getElementById('mf-id').value = m.id; document.getElementById('mf-name').value = m.title; document.getElementById('mf-cat').value = m.category; document.getElementById('mf-course').value = m.course; document.getElementById('mf-type').value = m.type; document.getElementById('mf-desc').value = m.desc || ""; state.selectedFiles = [{ name: m.file, size: "12.5 MB", type: m.file.split('.').pop() }]; renderFileList(); document.getElementById('mf-delete-btn').classList.remove('hidden'); setFormPrivate(m.isPrivate); openModal('modal-form'); }
+        function toggleFormPrivate() { const check = document.getElementById('mf-private-check'); setFormPrivate(!check.checked); }
+        function setFormPrivate(isPrivate) { const check = document.getElementById('mf-private-check'); const bg = document.getElementById('mf-switch-bg'); const dot = document.getElementById('mf-switch-dot'); const icon = document.getElementById('mf-lock-icon'); check.checked = isPrivate; if(isPrivate) { bg.classList.replace('bg-gray-300', 'bg-apple-blue'); dot.classList.replace('translate-x-0', 'translate-x-6'); icon.classList.add('text-apple-blue'); } else { bg.classList.replace('bg-apple-blue', 'bg-gray-300'); dot.classList.replace('translate-x-6', 'translate-x-0'); icon.classList.remove('text-apple-blue'); } }
+        function handleFormSubmit(e) { e.preventDefault(); const id = document.getElementById('mf-id').value; let fileName = "unknown_file.pdf"; if (state.selectedFiles.length > 0) fileName = state.selectedFiles.length === 1 ? state.selectedFiles[0].name : `Архив (${state.selectedFiles.length} файлов)`; const data = { title: document.getElementById('mf-name').value, category: document.getElementById('mf-cat').value.toUpperCase(), course: document.getElementById('mf-course').value, type: document.getElementById('mf-type').value, desc: document.getElementById('mf-desc').value, isPrivate: document.getElementById('mf-private-check').checked }; if(id) { let m = state.materials.find(x => x.id == id); if (m) { Object.assign(m, data); m.file = fileName; } } else { state.materials.unshift({ ...data, id: Date.now(), author: state.user.name, authorId: state.user.id, date: new Date().toLocaleDateString('ru-RU'), likes: 0, isLiked: false, isFav: false, ai: null, aiStatus: 'none', file: fileName }); } closeModal('modal-form'); renderAllUI(); }
+        function deleteMaterial(id) { if(confirm("Вы уверены? Удаление нельзя отменить.")) { state.materials = state.materials.filter(x => x.id != id); renderAllUI(); } }
+        function handleDeleteCurrent() { const id = document.getElementById('mf-id').value; if (id) { deleteMaterial(id); closeModal('modal-form'); } }
+        function handleFileSelect(input) { const files = Array.from(input.files); files.forEach(file => { state.selectedFiles.push({ name: file.name, size: (file.size / 1024 / 1024).toFixed(2) + ' MB', type: file.name.split('.').pop().toLowerCase() }); }); input.value = ''; renderFileList(); }
+        function removeFile(index) { state.selectedFiles.splice(index, 1); renderFileList(); }
+        function renderFileList() { const container = document.getElementById('file-list-container'); container.innerHTML = state.selectedFiles.map((f, i) => { let iconClass = "bg-blue-50 text-blue-500"; let iconName = "file-text"; if(['html', 'css', 'js', 'py'].includes(f.type)) { iconClass = "bg-green-50 text-green-500"; iconName = "code"; } return `<div class="flex items-center justify-between p-4 bg-white border border-blue-100 rounded-2xl shadow-sm animate-fade-in group hover:border-blue-200 transition-colors"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded-xl ${iconClass} flex items-center justify-center transition-none"><i data-lucide="${iconName}" class="w-5 h-5"></i></div><div><p class="text-sm font-bold text-gray-800 line-clamp-1 break-all">${f.name}</p><p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">${f.size}</p></div></div><button type="button" onclick="removeFile(${i})" class="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"><i data-lucide="trash-2" class="w-5 h-5"></i></button></div>`}).join(''); lucide.createIcons(); }
+        function goToFeedFilter(cat) { document.getElementById('filter-course').value = 'All'; document.getElementById('filter-type').value = 'All'; const subjectSelect = document.getElementById('filter-subject'); if (subjectSelect.options.length === 1) { [...new Set(state.materials.map(m => m.category))].sort().forEach(c => subjectSelect.add(new Option(c, c))); } subjectSelect.value = cat; switchView('feed'); renderFeed(); }
+        function renderFavorites() { const catList = document.getElementById('fav-categories-list'); const grid = document.getElementById('fav-grid'); if (state.favoriteCategories.length === 0) { catList.innerHTML = `<p class="text-xs text-gray-400">Нет избранных предметов</p>`; } else { catList.innerHTML = state.favoriteCategories.map(cat => `<div class="inline-flex items-center rounded-2xl bg-yellow-50 border border-yellow-200 shadow-sm hover:shadow-md transition-all"><button onclick="goToFeedFilter('${cat}')" class="px-4 py-2.5 text-yellow-700 font-bold text-[10px] uppercase tracking-widest hover:bg-yellow-100 rounded-l-2xl transition-colors" title="Перейти к материалам">${cat}</button><div class="w-px h-4 bg-yellow-200/50"></div><button onclick="toggleCategoryFav('${cat}')" class="px-3 py-2.5 text-yellow-600 hover:text-red-500 hover:bg-red-50 rounded-r-2xl transition-colors" title="Удалить из избранного"><i data-lucide="x" class="w-3 h-3"></i></button></div>`).join(''); } const favMaterials = state.materials.filter(m => m.isFav); if (favMaterials.length === 0) { grid.innerHTML = `<div class="col-span-full py-20 text-center text-gray-400 font-semibold uppercase tracking-widest text-xs">У вас пока нет сохраненных материалов</div>`; } else { grid.innerHTML = favMaterials.map(m => { return `<div class="bg-white p-7 rounded-[2.5rem] shadow-sm border border-gray-50 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-500 cursor-pointer flex flex-col justify-between group" onclick="openDetail(${m.id})"><div><div class="flex justify-between items-start mb-6"><div class="flex gap-2"><span class="px-2.5 py-1.5 rounded-xl text-[10px] font-bold bg-blue-50 text-apple-blue uppercase">${m.type}</span><span class="px-2.5 py-1.5 rounded-xl text-[10px] font-bold bg-gray-50 text-gray-500 uppercase">${m.course} КУРС</span></div><button onclick="event.stopPropagation(); toggleCategoryFav('${m.category}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all ${state.favoriteCategories.includes(m.category) ? 'bg-yellow-50 text-yellow-600 border-yellow-200' : 'bg-gray-50/50 text-gray-400 border-gray-100'}"><span class="text-[10px] font-bold uppercase">${m.category}</span><i data-lucide="star" class="w-3.5 h-3.5 ${state.favoriteCategories.includes(m.category) ? 'fill-current' : ''} transition-none"></i></button></div><h3 class="text-2xl font-bold text-apple-text mb-2 line-clamp-2 leading-tight tracking-tight">${m.title}</h3><div class="flex items-center gap-2 mb-6"><i data-lucide="user" class="w-3 h-3 text-gray-300 transition-none"></i><span class="text-xs font-medium text-gray-400 hover:text-apple-blue transition-colors underline underline-offset-4 decoration-gray-200 cursor-pointer" onclick="event.stopPropagation(); openUserProfile(${m.authorId})">${m.author}</span><span class="w-1 h-1 rounded-full bg-gray-200"></span><span class="text-xs font-medium text-gray-300">${m.date}</span></div></div><div class="pt-6 border-t border-gray-50 flex items-center justify-between"><div class="flex gap-4"><button onclick="event.stopPropagation(); toggleLike(${m.id})" class="flex items-center gap-1.5 transition-colors ${m.isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}"><i data-lucide="heart" class="w-4 h-4 ${m.isLiked ? 'fill-current' : ''} transition-none"></i><span class="text-xs font-bold">${m.likes}</span></button><button onclick="event.stopPropagation(); toggleMaterialFav(${m.id})" class="transition-colors ${m.isFav ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}"><i data-lucide="star" class="w-4 h-4 ${m.isFav ? 'fill-current' : ''} transition-none"></i></button></div><a href="/static/${m.file}" download onclick="event.stopPropagation()" class="bg-gray-100 text-gray-700 px-5 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-all shadow-sm active:scale-95">Скачать <i data-lucide="download" class="w-3.5 h-3.5 inline transition-none"></i></a></div></div>`; }).join(''); } lucide.createIcons(); }
+        function openDetail(id) { const m = state.materials.find(x => x.id === id); state.currentMaterialId = id; document.getElementById('md-title').innerText = m.title; document.getElementById('md-cat').innerText = m.category; document.getElementById('md-date').innerText = m.date; document.getElementById('md-author-name').innerText = m.author; document.getElementById('md-author-avatar').innerText = m.author.charAt(0); document.getElementById('md-desc').innerText = m.desc || ""; document.getElementById('md-likes-stat').innerText = m.likes; document.getElementById('md-download-link').href = "/static/" + m.file; const aiC = document.getElementById('md-ai-container'); if (m.aiStatus === 'loading') aiC.innerHTML = `<div class="rounded-[2rem] bg-gray-50 border border-gray-100 p-8 flex items-center justify-center min-h-[150px]"><div class="flex flex-col items-center gap-3 text-gray-400"><i data-lucide="loader-2" class="w-8 h-8 animate-spin text-indigo-500"></i><span class="text-[10px] font-bold uppercase uppercase">Анализ...</span></div></div>`; else if (m.aiStatus === 'ready') aiC.innerHTML = `<div class="relative overflow-hidden rounded-[2rem] bg-[#F4F5FF] border border-indigo-100 p-8 shadow-inner"><div class="relative z-10"><div class="flex items-center gap-2.5 mb-4"><div class="p-2 bg-white rounded-xl shadow-sm text-indigo-600 transition-none"><i data-lucide="bot" class="w-5 h-5"></i></div><h3 class="text-[11px] font-bold text-indigo-900 uppercase tracking-[0.15em]">AI Анализ содержания</h3></div><p class="text-gray-700 font-semibold text-sm leading-relaxed">${m.ai}</p></div><i data-lucide="bot" class="absolute -bottom-4 -right-4 w-32 h-32 text-indigo-500/5 rotate-12 pointer-events-none transition-none"></i></div>`; else aiC.innerHTML = `<button onclick="generateAI(${m.id})" class="w-full py-6 rounded-[2rem] border-2 border-dashed border-purple-200 text-purple-600 transition-all text-sm font-bold uppercase tracking-widest flex items-center justify-center gap-3 group hover:bg-purple-50 hover:border-purple-300"><i data-lucide="sparkles" class="w-6 h-6 transition-none group-hover:scale-110"></i> Запустить AI Анализ материала</button>`; const filesContainer = document.getElementById('md-file-card-container'); const fileName = m.file || "unknown.pdf"; const ext = fileName.split('.').pop().toLowerCase(); let iconColor = "text-red-500 bg-red-50"; let iconName = "file-text"; if (ext === 'doc' || ext === 'docx') { iconColor = "text-blue-500 bg-blue-50"; } else if (ext === 'ppt' || ext === 'pptx') { iconColor = "text-orange-500 bg-orange-50"; } else if (ext === 'zip' || ext === 'rar') { iconColor = "text-gray-500 bg-gray-50"; iconName = "archive"; } filesContainer.innerHTML = `<div class="p-4 rounded-2xl border border-gray-100 flex items-center justify-between mt-6 hover:bg-gray-50 transition-colors cursor-pointer" onclick="document.getElementById('md-download-link').click()"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-xl ${iconColor} flex items-center justify-center"><i data-lucide="${iconName}" class="w-6 h-6"></i></div><div><p class="font-bold text-sm text-gray-800 uppercase">${ext}</p><p class="text-xs text-gray-400 font-bold uppercase tracking-wider">4.2 MB</p></div></div><span class="text-xs font-bold text-apple-blue cursor-pointer hover:underline">Предпросмотр</span></div>`; const likeBtn = document.getElementById('md-like-btn'); likeBtn.innerHTML = `<i data-lucide="heart" class="w-5 h-5 ${m.isLiked ? 'fill-current' : ''} transition-none"></i> <span>${m.likes}</span>`; likeBtn.className = `flex items-center gap-2 px-6 py-4 rounded-2xl border font-bold text-sm transition-all ${m.isLiked ? 'bg-red-50 border-red-200 text-red-500' : 'bg-white border-gray-100 text-gray-500'}`; likeBtn.onclick = () => { m.isLiked = !m.isLiked; m.likes += m.isLiked ? 1 : -1; renderAllUI(); }; const favBtn = document.getElementById('md-fav-btn'); favBtn.innerHTML = `<i data-lucide="star" class="w-6 h-6 ${m.isFav ? 'fill-current' : ''} transition-none"></i>`; favBtn.className = `p-4 rounded-2xl border transition-all ${m.isFav ? 'bg-yellow-50 border-yellow-200 text-yellow-500' : 'bg-white border-gray-100 text-gray-400'}`; favBtn.onclick = () => { m.isFav = !m.isFav; renderAllUI(); }; document.getElementById('md-author-trigger').onclick = () => { closeModal('modal-detail'); setTimeout(() => openUserProfile(m.authorId), 300); }; openModal('modal-detail'); }
+        function toggleCategoryFav(cat) { state.favoriteCategories = state.favoriteCategories.includes(cat) ? state.favoriteCategories.filter(c => c !== cat) : [...state.favoriteCategories, cat]; renderAllUI(); }
+        function toggleLike(id) { const m = state.materials.find(x => x.id === id); m.isLiked = !m.isLiked; m.likes += m.isLiked ? 1 : -1; renderAllUI(); }
+        function toggleMaterialFav(id) { const m = state.materials.find(x => x.id === id); m.isFav = !m.isFav; renderAllUI(); }
+        function renderFeed() { const grid = document.getElementById('feed-grid'); const search = document.getElementById('feed-search').value.toLowerCase(); const subjF = document.getElementById('filter-subject').value; const courseF = document.getElementById('filter-course').value; const typeF = document.getElementById('filter-type').value; const subjSelect = document.getElementById('filter-subject'); if (subjSelect.options.length === 1) [...new Set(state.materials.map(m => m.category))].sort().forEach(c => subjSelect.add(new Option(c, c))); const filtered = state.materials.filter(m => (m.authorId === state.user.id || !m.isPrivate) && (m.title.toLowerCase().includes(search) || m.author.toLowerCase().includes(search)) && (subjF === 'All' || m.category === subjF) && (courseF === 'All' || m.course.toString() === courseF) && (typeF === 'All' || m.type === typeF) ); grid.innerHTML = filtered.map(m => { const isExpanded = state.expandedAI.includes(m.id), isCatFav = state.favoriteCategories.includes(m.category); let ai = ''; if(m.aiStatus === 'loading') ai = `<button class="w-full py-3 rounded-2xl bg-gray-100 text-[11px] font-bold uppercase flex items-center justify-center gap-2 cursor-wait"><i data-lucide="loader-2" class="w-4 h-4 animate-spin text-indigo-500"></i> Генерирую...</button>`; else if(m.aiStatus === 'ready') ai = `<button onclick="toggleAISummary(${m.id}, event)" class="w-full py-3 rounded-2xl bg-gradient-to-r from-violet-50 to-purple-50 text-purple-700 text-[11px] font-bold uppercase border border-purple-100 flex items-center justify-center gap-2 shadow-sm">AI Анализ <i data-lucide="chevron-down" class="w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}"></i></button>${isExpanded ? `<div class="mt-3 p-4 bg-purple-50/50 rounded-2xl border border-purple-100 flex gap-3 animate-fade-in"><div class="flex-shrink-0 mt-0.5"><i data-lucide="bot" class="w-5 h-5 text-purple-600 transition-none"></i></div><p class="text-[11px] text-gray-700 font-semibold">${m.ai}</p></div>` : ''}`; else ai = `<button onclick="generateAI(${m.id}, event)" class="w-full py-3 rounded-2xl border-2 border-dashed border-purple-200 text-purple-600 hover:bg-purple-50 transition-all text-[11px] font-bold uppercase flex items-center justify-center gap-2"><i data-lucide="sparkles" class="w-3.5 h-3.5 transition-none"></i> Создать AI обзор</button>`; return `<div class="bg-white p-7 rounded-[2.5rem] shadow-sm border border-gray-50 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-500 cursor-pointer flex flex-col justify-between group" onclick="openDetail(${m.id})"><div><div class="flex justify-between items-start mb-6"><div class="flex gap-2"><span class="px-2.5 py-1.5 rounded-xl text-[10px] font-bold bg-blue-50 text-apple-blue uppercase">${m.type}</span><span class="px-2.5 py-1.5 rounded-xl text-[10px] font-bold bg-gray-50 text-gray-500 uppercase">${m.course} КУРС</span></div><button onclick="event.stopPropagation(); toggleCategoryFav('${m.category}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all ${isCatFav ? 'bg-yellow-50 text-yellow-600 border-yellow-200' : 'bg-gray-50/50 text-gray-400 border-gray-100'}"><span class="text-[10px] font-bold uppercase">${m.category}</span><i data-lucide="star" class="w-3.5 h-3.5 ${isCatFav ? 'fill-current' : ''} transition-none"></i></button></div><h3 class="text-2xl font-bold text-apple-text mb-2 line-clamp-2 leading-tight tracking-tight">${m.title}</h3><div class="flex items-center gap-2 mb-6"><i data-lucide="user" class="w-3 h-3 text-gray-300 transition-none"></i><span class="text-xs font-medium text-gray-400 hover:text-apple-blue transition-colors underline underline-offset-4 decoration-gray-200 cursor-pointer" onclick="event.stopPropagation(); openUserProfile(${m.authorId})">${m.author}</span><span class="w-1 h-1 rounded-full bg-gray-200"></span><span class="text-xs font-medium text-gray-300">${m.date}</span></div><div class="mb-6">${ai}</div></div><div class="pt-6 border-t border-gray-50 flex items-center justify-between"><div class="flex gap-4"><button onclick="event.stopPropagation(); toggleLike(${m.id})" class="flex items-center gap-1.5 transition-colors ${m.isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}"><i data-lucide="heart" class="w-4 h-4 ${m.isLiked ? 'fill-current' : ''} transition-none"></i><span class="text-xs font-bold">${m.likes}</span></button><button onclick="event.stopPropagation(); toggleMaterialFav(${m.id})" class="transition-colors ${m.isFav ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}"><i data-lucide="star" class="w-4 h-4 ${m.isFav ? 'fill-current' : ''} transition-none"></i></button></div><a href="/static/${m.file}" download onclick="event.stopPropagation()" class="bg-gray-100 text-gray-700 px-5 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-all shadow-sm active:scale-95">Скачать <i data-lucide="download" class="w-3.5 h-3.5 inline transition-none"></i></a></div></div>`; }).join(''); lucide.createIcons(); }
+
+    </script>
 </body>
 </html>
