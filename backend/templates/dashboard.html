@@ -43,7 +43,6 @@
         .view-section.active { display: block; animation: fadeIn 0.3s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Логика навигации */
         .nav-item { transition: all 0.2s ease; }
         .nav-item:not(.active):hover { background-color: #f3f4f6; }
         .nav-item:not(.active):hover i { color: #1D1D1F !important; }
@@ -51,7 +50,6 @@
         .nav-item.active { background-color: #000; color: #fff; cursor: default; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .nav-item.active i { color: #fff !important; }
 
-        /* Модальные окна */
         .modal-backdrop { transition: opacity 0.3s ease-out; }
         .modal-content { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .modal-hidden { opacity: 0; pointer-events: none; }
@@ -59,24 +57,9 @@
         .modal-visible { opacity: 1; pointer-events: auto; }
         .modal-visible .modal-content { transform: scale(1) translateY(0); }
 
-        /* Анимация свича */
         .switch-dot { transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); }
-
-        /* Стили для чекбокса задач */
         .task-checkbox:checked + div { background-color: #10B981; border-color: #10B981; }
         .task-checkbox:checked + div svg { display: block; }
-
-        /* Стили календаря */
-        input[type="date"]::-webkit-calendar-picker-indicator,
-        input[type="time"]::-webkit-calendar-picker-indicator {
-            cursor: pointer; opacity: 0.6; transition: 0.2s;
-        }
-        input[type="date"]::-webkit-calendar-picker-indicator:hover,
-        input[type="time"]::-webkit-calendar-picker-indicator:hover {
-            opacity: 1;
-        }
-
-        /* Тогглы для настроек */
         .settings-toggle:checked + div { background-color: #007EC6; }
         .settings-toggle:checked + div .toggle-dot { transform: translateX(1.25rem); }
     </style>
@@ -122,14 +105,13 @@
         </nav>
 
         <div class="p-6 border-t border-gray-50">
-            <button onclick="location.href='index.html'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 transition-all font-bold text-sm">
+            <button onclick="location.href='/'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 transition-all font-bold text-sm">
                 <i data-lucide="log-out" class="w-5 h-5"></i> Выйти
             </button>
         </div>
     </aside>
 
     <main class="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-12">
-
         <div id="view-feed" class="view-section active max-w-7xl mx-auto">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
                 <div>
@@ -162,7 +144,7 @@
                         <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400"><i data-lucide="chevron-down" class="w-4 h-4"></i></div>
                     </div>
                 </div>
-                <div class="space-y-2">
+                 <div class="space-y-2">
                     <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Тип работы</label>
                     <div class="relative group">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-apple-blue transition-colors"><i data-lucide="layers" class="w-4 h-4"></i></div>
@@ -200,7 +182,7 @@
                         <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400"><i data-lucide="chevron-down" class="w-4 h-4"></i></div>
                     </div>
                 </div>
-                <div class="space-y-2">
+                 <div class="space-y-2">
                     <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Тип работы</label>
                     <div class="relative group">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-apple-blue transition-colors"><i data-lucide="layers" class="w-4 h-4"></i></div>
@@ -271,7 +253,6 @@
                     </div>
                     <div id="tasks-urgent-list" class="space-y-4"></div>
                 </div>
-
                 <div>
                     <div class="flex items-center gap-2 mb-6">
                         <div class="w-2 h-2 rounded-full bg-blue-500"></div>
@@ -280,7 +261,6 @@
                     </div>
                     <div id="tasks-upcoming-list" class="space-y-4"></div>
                 </div>
-
                 <div>
                     <div class="flex items-center gap-2 mb-6">
                         <div class="w-2 h-2 rounded-full bg-green-500"></div>
@@ -308,12 +288,12 @@
                         <div class="w-full space-y-3">
                             <div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl">
                                 <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Загрузок</span>
-                                <span class="text-lg font-bold text-apple-blue">12</span>
+                                <span id="set-stat-downloads" class="text-lg font-bold text-apple-blue">0</span>
                             </div>
                             <div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl">
                                 <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Рейтинг</span>
                                 <div class="flex items-center gap-1">
-                                    <span class="text-lg font-bold text-yellow-500">4.9</span>
+                                    <span id="set-stat-rating" class="text-lg font-bold text-yellow-500">1.0</span>
                                     <i data-lucide="star" class="w-4 h-4 text-yellow-500 fill-current"></i>
                                 </div>
                             </div>
@@ -322,12 +302,10 @@
                 </div>
 
                 <div class="lg:col-span-2 space-y-8">
-
                     <div class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100">
                         <h3 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
                             <i data-lucide="user" class="w-5 h-5 text-apple-blue"></i> Личная информация
                         </h3>
-
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="space-y-1">
                                 <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Имя</label>
@@ -337,7 +315,6 @@
                                 <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Возраст</label>
                                 <input id="set-user-age" type="number" class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-100 font-semibold text-gray-700">
                             </div>
-
                             <div class="space-y-1">
                                 <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">ВУЗ</label>
                                 <div class="relative">
@@ -354,12 +331,10 @@
                                     <option value="4">4 курс</option>
                                 </select>
                             </div>
-
                             <div class="md:col-span-2 space-y-1">
                                 <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">О себе</label>
                                 <textarea id="set-user-bio" rows="3" class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-100 font-medium text-gray-700 resize-none"></textarea>
                             </div>
-
                              <div class="space-y-1">
                                 <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Email</label>
                                 <input id="set-user-email" type="text" class="w-full px-5 py-4 bg-gray-100 border-none rounded-2xl outline-none text-gray-400 font-semibold cursor-not-allowed" readonly>
@@ -379,13 +354,6 @@
                             <i data-lucide="shield" class="w-5 h-5 text-green-500"></i> Настройки приватности
                         </h3>
                         <div class="space-y-6">
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm font-bold text-gray-700">Показывать Email</span>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" class="sr-only peer settings-toggle" id="toggle-email">
-                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all toggle-dot transition-colors duration-300"></div>
-                                </label>
-                            </div>
                             <div class="flex items-center justify-between">
                                 <span class="text-sm font-bold text-gray-700">Показывать блок "О себе"</span>
                                 <label class="relative inline-flex items-center cursor-pointer">
@@ -449,11 +417,11 @@
                         </div>
                         <div class="flex flex-col items-center justify-center p-6 rounded-3xl bg-gray-50/50 border border-gray-100">
                             <div class="flex items-center gap-2 mb-1.5 text-gray-400"><i data-lucide="download" class="w-4 h-4 transition-none"></i><span class="text-[10px] font-bold uppercase tracking-widest">Скачивания</span></div>
-                            <span class="text-2xl font-bold text-gray-800">154</span>
+                            <span id="md-downloads-stat" class="text-2xl font-bold text-gray-800">0</span>
                         </div>
                         <div class="flex flex-col items-center justify-center p-6 rounded-3xl bg-gray-50/50 border border-gray-100">
                             <div class="flex items-center gap-2 mb-1.5 text-gray-400"><i data-lucide="eye" class="w-4 h-4 transition-none"></i><span class="text-[10px] font-bold uppercase tracking-widest">Просмотры</span></div>
-                            <span class="text-2xl font-bold text-gray-800">320</span>
+                            <span id="md-views-stat" class="text-2xl font-bold text-gray-800">0</span>
                         </div>
                     </div>
                     <div id="md-ai-container"></div>
@@ -464,7 +432,6 @@
                     <div id="md-file-card-container"></div>
                 </div>
             </div>
-
             <div class="p-8 border-t border-gray-100 bg-white flex items-center justify-between gap-4 z-20 shadow-[0_-10px_25px_rgba(0,0,0,0.02)]">
                 <button onclick="handleShare(event)" id="share-btn" class="p-4 rounded-2xl border border-gray-200 text-gray-500 transition-all active:scale-90 shadow-sm flex items-center justify-center">
                     <i data-lucide="share-2" id="share-icon" class="w-6 h-6 transition-none"></i>
@@ -566,12 +533,10 @@
                         <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Задача</label>
                         <input id="mt-text" type="text" placeholder="Напр: Сдать лабу по физике" class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-100 font-semibold" required>
                     </div>
-
                     <div class="space-y-1">
                         <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Предмет</label>
                         <input id="mt-subj" type="text" placeholder="Физика" class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-100 font-semibold">
                     </div>
-
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-1">
                             <label class="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest">Дата</label>
@@ -582,7 +547,6 @@
                             <input id="mt-time-part" type="time" class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-blue-100 font-semibold text-gray-600">
                         </div>
                     </div>
-
                     <div class="flex items-center justify-between p-4 bg-red-50 rounded-2xl cursor-pointer hover:bg-red-100 transition-all" onclick="toggleTaskUrgent()">
                         <div class="flex items-center gap-3">
                             <div class="p-2 bg-white rounded-xl shadow-sm text-red-500"><i data-lucide="flame" class="w-5 h-5"></i></div>
@@ -617,9 +581,9 @@
                 <h2 id="up-name" class="text-3xl font-bold text-gray-900 mb-1 leading-tight tracking-tight"></h2>
                 <p id="up-uni" class="text-sm text-gray-400 font-semibold uppercase tracking-widest"></p>
                 <div class="flex items-center justify-center gap-10 mt-8 w-full">
-                    <div class="text-center"><span class="block text-2xl font-bold text-gray-900">12</span><span class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Загрузок</span></div>
+                    <div class="text-center"><span id="up-downloads" class="block text-2xl font-bold text-gray-900">0</span><span class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Загрузок</span></div>
                     <div class="w-px h-10 bg-gray-100"></div>
-                    <div class="text-center"><div class="flex items-center justify-center gap-1"><span class="text-2xl font-bold text-gray-900">4.9</span><i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current mb-0.5 transition-none"></i></div><span class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Рейтинг</span></div>
+                    <div class="text-center"><div class="flex items-center justify-center gap-1"><span id="up-rating" class="text-2xl font-bold text-gray-900">1.0</span><i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current mb-0.5 transition-none"></i></div><span class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Рейтинг</span></div>
                 </div>
             </div>
             <div class="px-10 pb-10 space-y-6">
@@ -639,340 +603,842 @@
     </div>
 
     <script>
-        const state = {
-            user: {
-                name: "Алексей Смирнов",
-                id: 1,
-                university: "МАИ",
-                bio: "Студент 3 курса, кафедра 806. Увлекаюсь AI.",
-                course: "3",
-                telegram: "@alex_dev",
-                email: "student@mai.ru",
-                age: 20,
-                avatarUrl: null,
-                privacy: { email: false, bio: true, uni: true, tg: true }
-            },
-            favoriteCategories: ["ФИЗИКА"],
-            materials: [
-                { id: 1, title: "Введение в Квантовую Механику", author: "Алексей Петров", authorId: 2, category: "ФИЗИКА", date: "25.10.2023", type: "ЛК", course: 2, likes: 45, isLiked: false, isFav: true, ai: "Ключевые понятия: Дуализм, уравнение Шрёдингера.", desc: "Лекционные заметки.", file: "physics_1.pdf", isPrivate: false },
-                { id: 2, title: "Алгоритмы и Структуры Данных", author: "Мария Иванова", authorId: 3, category: "ИНФОРМАТИКА", date: "23.10.2023", type: "РГР", course: 2, likes: 124, isLiked: true, isFav: true, ai: null, desc: "Справочник по алгоритмам.", file: "algo_struct.pdf", isPrivate: false },
-                { id: 3, title: "Лабораторная №3 по схемотехнике", author: "Дмитрий С.", authorId: 4, category: "ИНФОРМАТИКА", date: "28.10.2023", type: "ЛР", course: 3, likes: 10, isLiked: false, isFav: false, ai: null, desc: "Исследование логических элементов.", file: "lab_3.pdf", isPrivate: false },
-                { id: 4, title: "Мой проект по физике", author: "Алексей Смирнов", authorId: 1, category: "ФИЗИКА", date: "15.12.2023", type: "РГР", course: 3, likes: 0, isLiked: false, isFav: false, ai: null, desc: "Черновик личного проекта.", file: "my_project.pdf", isPrivate: true }
-            ],
-            // ЗАДАЧИ: Формат ISO для корректной сортировки
-            tasks: [
-                { id: 10, text: "Сдать курсовую по физике", date: "2025-12-20T14:00", urgent: true, done: false, subject: "Физика" },
-                { id: 11, text: "Лабораторная работа", date: "2025-12-21T10:00", urgent: true, done: false, subject: "Информатика" },
-                { id: 12, text: "Подготовить доклад", date: "2025-12-25T18:30", urgent: false, done: false, subject: "История" },
-                { id: 13, text: "Решить задачи", date: "2023-11-15T09:00", urgent: false, done: true, subject: "Мат. анализ" }
-            ],
-            expandedAI: [],
-            currentMaterialId: null,
-            selectedFiles: []
-        };
+// === ДАННЫЕ ОТ СЕРВЕРА ===
+    const currentUser = {{ user_json | safe }};
+    const serverMaterials = {{ materials_json | safe }};
 
-        state.materials.forEach(m => m.aiStatus = m.ai ? 'ready' : 'none');
+    const state = {
+        user: currentUser,
+        favoriteCategories: currentUser.favCats || [],
+        materials: serverMaterials,
+        tasks: [],
+        expandedAI: [],
+        currentMaterialId: null,
+        selectedFiles: []
+    };
 
-        window.onload = () => { renderSidebar(); renderFeed(); renderStorage(); renderTasks(); lucide.createIcons(); };
+    // Проставляем статусы AI при загрузке
+    state.materials.forEach(m => m.aiStatus = m.ai ? 'ready' : 'none');
 
-        function renderAllUI() {
-            renderSidebar(); renderFeed(); renderStorage(); renderTasks();
-            if (document.getElementById('view-favorites').classList.contains('active')) renderFavorites();
-            if(document.getElementById('modal-detail').classList.contains('modal-visible') && state.currentMaterialId) openDetail(state.currentMaterialId);
-            lucide.createIcons();
+    // === ЗАПУСК ===
+    window.onload = () => {
+        renderSidebar();
+        renderFeed();
+        renderStorage();
+        renderTasks();
+        lucide.createIcons();
+    };
+
+    function renderAllUI() {
+        renderSidebar();
+        renderFeed();
+        renderStorage();
+        renderTasks();
+        if (document.getElementById('view-favorites').classList.contains('active')) renderFavorites();
+        if(document.getElementById('modal-detail').classList.contains('modal-visible') && state.currentMaterialId) openDetail(state.currentMaterialId);
+        lucide.createIcons();
+    }
+
+    // === ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ===
+    function switchView(id) {
+        document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+        document.getElementById('view-' + id).classList.add('active');
+
+        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+        document.getElementById('nav-' + id).classList.add('active');
+
+        if(id === 'tasks') renderTasks();
+        if(id === 'favorites') renderFavorites();
+        if(id === 'settings') initSettingsFields();
+
+        lucide.createIcons();
+    }
+
+    // === МОДАЛЬНЫЕ ОКНА ===
+    function openModal(id) {
+        document.getElementById(id).classList.replace('modal-hidden', 'modal-visible');
+        document.body.style.overflow = 'hidden';
+        lucide.createIcons();
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.replace('modal-visible', 'modal-hidden');
+        document.body.style.overflow = '';
+    }
+
+    // === ЗАГРУЗКА И ФОРМЫ МАТЕРИАЛОВ ===
+    async function handleFormSubmit(e) {
+        e.preventDefault();
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerText;
+        submitBtn.innerText = "Сохранение...";
+        submitBtn.disabled = true;
+
+        const matId = document.getElementById('mf-id').value;
+        const formData = new FormData();
+        formData.append("email", state.user.email);
+        formData.append("title", document.getElementById('mf-name').value);
+        formData.append("category", document.getElementById('mf-cat').value.toUpperCase());
+        formData.append("course", document.getElementById('mf-course').value);
+        formData.append("material_type", document.getElementById('mf-type').value);
+        formData.append("description", document.getElementById('mf-desc').value);
+        formData.append("is_private", document.getElementById('mf-private-check').checked);
+
+        if (matId) formData.append("material_id", matId);
+
+        if(state.selectedFiles.length > 0) {
+            state.selectedFiles.forEach(f => {
+                if(f.originalFile) formData.append("files", f.originalFile);
+            });
+        } else if (!matId) {
+            alert("Выберите хотя бы один файл!");
+            submitBtn.innerText = originalText;
+            submitBtn.disabled = false;
+            return;
         }
 
-        // --- AVATAR & SETTINGS ---
-        function handleAvatarUpload(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    state.user.avatarUrl = e.target.result;
-                    renderSidebar();
-                    initSettingsFields();
+        const url = matId ? "/api/material/edit" : "/upload";
 
-                    const upAvatar = document.getElementById('up-avatar');
-                    const upImg = document.getElementById('up-avatar-img');
-                    if (upAvatar && upImg) {
-                        upAvatar.classList.add('hidden');
-                        upImg.src = state.user.avatarUrl;
-                        upImg.classList.remove('hidden');
-                    }
-                }
-                reader.readAsDataURL(input.files[0]);
+        try {
+            const response = await fetch(url, { method: "POST", body: formData });
+            if (response.ok) window.location.reload();
+            else {
+                const resJson = await response.json();
+                alert("Ошибка: " + (resJson.message || "Сбой сервера"));
             }
+        } catch (error) {
+            console.error(error);
+            alert("Ошибка соединения");
+        } finally {
+            submitBtn.innerText = originalText;
+            submitBtn.disabled = false;
         }
+    }
 
-        function initSettingsFields() {
-            document.getElementById('set-card-name').innerText = state.user.name;
-            document.getElementById('set-card-email').innerText = state.user.email;
+    function handleFileSelect(input) {
+        const files = Array.from(input.files);
+        files.forEach(file => {
+            state.selectedFiles.push({
+                name: file.name,
+                size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+                type: file.name.split('.').pop().toLowerCase(),
+                originalFile: file
+            });
+        });
+        input.value = '';
+        renderFileList();
+    }
 
-            const cardAvatarText = document.getElementById('set-card-avatar-text');
-            const cardAvatarImg = document.getElementById('set-card-avatar-img');
+    function removeFile(index) {
+        state.selectedFiles.splice(index, 1);
+        renderFileList();
+    }
 
-            if (state.user.avatarUrl) {
-                cardAvatarText.classList.add('hidden');
-                cardAvatarImg.src = state.user.avatarUrl;
-                cardAvatarImg.classList.remove('hidden');
+    function renderFileList() {
+        const container = document.getElementById('file-list-container');
+        container.innerHTML = state.selectedFiles.map((f, i) => {
+            let iconClass = "bg-blue-50 text-blue-500";
+            let iconName = "file-text";
+            if(['html', 'css', 'js', 'py'].includes(f.type)) { iconClass = "bg-green-50 text-green-500"; iconName = "code"; }
+            return `<div class="flex items-center justify-between p-4 bg-white border border-blue-100 rounded-2xl shadow-sm animate-fade-in group hover:border-blue-200 transition-colors"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded-xl ${iconClass} flex items-center justify-center transition-none"><i data-lucide="${iconName}" class="w-5 h-5"></i></div><div><p class="text-sm font-bold text-gray-800 line-clamp-1 break-all">${f.name}</p><p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">${f.size}</p></div></div><button type="button" onclick="removeFile(${i})" class="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"><i data-lucide="trash-2" class="w-5 h-5"></i></button></div>`
+        }).join('');
+        lucide.createIcons();
+    }
+
+    function openFormModal() {
+        document.getElementById('mf-head').innerText = "Загрузка материала";
+        document.getElementById('mf-id').value = "";
+        document.getElementById('mf-delete-btn').classList.add('hidden');
+        document.querySelector('#modal-form form').reset();
+        state.selectedFiles = [];
+        renderFileList();
+        setFormPrivate(false);
+        openModal('modal-form');
+    }
+
+    function openEditModal(id) {
+        const m = state.materials.find(x => x.id === id);
+        if (!m) return;
+        document.getElementById('mf-head').innerText = "Редактирование";
+        document.getElementById('mf-id').value = m.id;
+        document.getElementById('mf-name').value = m.title;
+        document.getElementById('mf-cat').value = m.category;
+        document.getElementById('mf-course').value = m.course;
+        document.getElementById('mf-type').value = m.type;
+        document.getElementById('mf-desc').value = m.desc || "";
+
+        state.selectedFiles = [];
+        if(m.files && m.files.length > 0) {
+            m.files.forEach(f => {
+                state.selectedFiles.push({
+                    name: f.name,
+                    size: f.size,
+                    type: f.ext,
+                    originalFile: null
+                });
+            });
+        }
+        renderFileList();
+
+        document.getElementById('mf-delete-btn').classList.remove('hidden');
+        setFormPrivate(m.isPrivate);
+        openModal('modal-form');
+    }
+
+    function toggleFormPrivate() { const check = document.getElementById('mf-private-check'); setFormPrivate(!check.checked); }
+    function setFormPrivate(isPrivate) {
+        const check = document.getElementById('mf-private-check');
+        const bg = document.getElementById('mf-switch-bg');
+        const dot = document.getElementById('mf-switch-dot');
+        const icon = document.getElementById('mf-lock-icon');
+        check.checked = isPrivate;
+        if(isPrivate) {
+            bg.classList.replace('bg-gray-300', 'bg-apple-blue');
+            dot.classList.replace('translate-x-0', 'translate-x-6');
+            icon.classList.add('text-apple-blue');
+        } else {
+            bg.classList.replace('bg-apple-blue', 'bg-gray-300');
+            dot.classList.replace('translate-x-6', 'translate-x-0');
+            icon.classList.remove('text-apple-blue');
+        }
+    }
+
+    async function deleteMaterial(id) {
+        if(!confirm("Вы уверены? Удаление нельзя отменить.")) return;
+        const formData = new FormData();
+        formData.append("material_id", id);
+        formData.append("email", state.user.email);
+
+        try {
+            const response = await fetch("/api/material/delete", { method: "POST", body: formData });
+            const data = await response.json();
+            if (data.status === "ok") {
+                state.materials = state.materials.filter(x => x.id != id);
+                renderAllUI();
             } else {
-                cardAvatarText.innerText = state.user.name.charAt(0);
-                cardAvatarText.classList.remove('hidden');
-                cardAvatarImg.classList.add('hidden');
+                alert("Ошибка: " + (data.message || "Не удалось удалить"));
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Ошибка соединения");
+        }
+    }
+    function handleDeleteCurrent() { const id = document.getElementById('mf-id').value; if (id) { deleteMaterial(id); closeModal('modal-form'); } }
+
+    function renderFeed() {
+        try {
+            const grid = document.getElementById('feed-grid');
+            if (!grid) return;
+
+            const search = (document.getElementById('feed-search')?.value || "").toLowerCase();
+            const subjF = document.getElementById('filter-subject')?.value || "All";
+            const courseF = document.getElementById('filter-course')?.value || "All";
+            const typeF = document.getElementById('filter-type')?.value || "All";
+
+            const subjSelect = document.getElementById('filter-subject');
+            if (subjSelect && subjSelect.options.length === 1 && state.materials) {
+                [...new Set(state.materials.map(m => m.category))].sort().forEach(c => subjSelect.add(new Option(c, c)));
             }
 
-            document.getElementById('set-user-name').value = state.user.name;
-            document.getElementById('set-user-age').value = state.user.age || "";
-            document.getElementById('set-user-uni').value = state.user.university;
-            document.getElementById('set-user-course').value = state.user.course;
-            document.getElementById('set-user-bio').value = state.user.bio;
-            document.getElementById('set-user-email').value = state.user.email;
-            document.getElementById('set-user-tg').value = state.user.telegram;
+            if (!state.materials) return;
 
-            document.getElementById('toggle-email').checked = state.user.privacy.email;
-            document.getElementById('toggle-bio').checked = state.user.privacy.bio;
-            document.getElementById('toggle-uni').checked = state.user.privacy.uni;
-            document.getElementById('toggle-tg').checked = state.user.privacy.tg;
-        }
+            const filtered = state.materials.filter(m => {
+                const isPrivate = m.isPrivate === true;
+                if (isPrivate) return false;
+                return (
+                    (m.title.toLowerCase().includes(search) || m.author.toLowerCase().includes(search)) &&
+                    (subjF === 'All' || m.category === subjF) &&
+                    (courseF === 'All' || m.course.toString() === courseF) &&
+                    (typeF === 'All' || m.type === typeF)
+                );
+            });
 
-        function saveSettings() {
-            state.user.name = document.getElementById('set-user-name').value;
-            state.user.age = document.getElementById('set-user-age').value;
-            state.user.university = document.getElementById('set-user-uni').value;
-            state.user.course = document.getElementById('set-user-course').value;
-            state.user.bio = document.getElementById('set-user-bio').value;
-            state.user.telegram = document.getElementById('set-user-tg').value;
+            grid.innerHTML = filtered.map(m => {
+                const isExpanded = state.expandedAI.includes(m.id);
+                const isCatFav = state.favoriteCategories.includes(m.category);
 
-            state.user.privacy.email = document.getElementById('toggle-email').checked;
-            state.user.privacy.bio = document.getElementById('toggle-bio').checked;
-            state.user.privacy.uni = document.getElementById('toggle-uni').checked;
-            state.user.privacy.tg = document.getElementById('toggle-tg').checked;
+                let downloadLink = "#";
+                if (m.files && m.files.length > 0) downloadLink = "/download/" + m.files[0].id;
 
-            renderSidebar();
-            initSettingsFields();
-            alert("Настройки сохранены!");
-        }
+                let ai = '';
+                if(m.aiStatus === 'loading') ai = `<button class="w-full py-3 rounded-2xl bg-gray-100 text-[11px] font-bold uppercase flex items-center justify-center gap-2 cursor-wait"><i data-lucide="loader-2" class="w-4 h-4 animate-spin text-indigo-500"></i> Генерирую...</button>`;
+                else if(m.aiStatus === 'ready') ai = `<button onclick="toggleAISummary(${m.id}, event)" class="w-full py-3 rounded-2xl bg-gradient-to-r from-violet-50 to-purple-50 text-purple-700 text-[11px] font-bold uppercase border border-purple-100 flex items-center justify-center gap-2 shadow-sm">AI Анализ <i data-lucide="chevron-down" class="w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}"></i></button>${isExpanded ? `<div class="mt-3 p-4 bg-purple-50/50 rounded-2xl border border-purple-100 flex gap-3 animate-fade-in"><div class="flex-shrink-0 mt-0.5"><i data-lucide="bot" class="w-5 h-5 text-purple-600 transition-none"></i></div><p class="text-[11px] text-gray-700 font-semibold">${m.ai}</p></div>` : ''}`;
+                else ai = `<button onclick="generateAI(${m.id}, event)" class="w-full py-3 rounded-2xl border-2 border-dashed border-purple-200 text-purple-600 hover:bg-purple-50 transition-all text-[11px] font-bold uppercase flex items-center justify-center gap-2"><i data-lucide="sparkles" class="w-3.5 h-3.5 transition-none"></i> Создать AI обзор</button>`;
 
-        // --- TASKS LOGIC ---
-        function formatTaskDate(isoString) {
-            if(!isoString || isoString === "Без даты") return "Без даты";
-            const date = new Date(isoString);
-            if (isNaN(date.getTime())) return isoString;
-            return date.toLocaleString('ru-RU', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-        }
-
-        function renderTasks() {
-            const urgentList = document.getElementById('tasks-urgent-list');
-            const upcomingList = document.getElementById('tasks-upcoming-list');
-            const doneList = document.getElementById('tasks-done-list');
-
-            const sortByDate = (a, b) => {
-                if (!a.date) return 1; if (!b.date) return -1;
-                return new Date(a.date) - new Date(b.date);
-            };
-
-            const urgentT = state.tasks.filter(t => !t.done && t.urgent).sort(sortByDate);
-            const upcomingT = state.tasks.filter(t => !t.done && !t.urgent).sort(sortByDate);
-            const doneT = state.tasks.filter(t => t.done).sort((a,b) => new Date(b.date) - new Date(a.date));
-
-            document.getElementById('task-count-urgent').innerText = urgentT.length;
-            document.getElementById('task-count-upcoming').innerText = upcomingT.length;
-            document.getElementById('task-count-done').innerText = doneT.length;
-
-            const createCard = (t) => `
-                <div onclick="openEditTaskModal(${t.id})" class="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all flex items-start gap-4 group cursor-pointer">
-                    <label class="relative flex items-center justify-center cursor-pointer mt-1" onclick="event.stopPropagation()">
-                        <input type="checkbox" class="task-checkbox hidden" ${t.done ? 'checked' : ''} onchange="toggleTaskDone(${t.id})">
-                        <div class="w-6 h-6 rounded-lg border-2 border-gray-200 transition-all flex items-center justify-center text-white">
-                            <svg class="w-4 h-4 hidden pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                return `
+                <div class="bg-white p-7 rounded-[2.5rem] shadow-sm border border-gray-50 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-500 cursor-pointer flex flex-col justify-between group" onclick="openDetail(${m.id})">
+                    <div>
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="flex gap-2">
+                                <span class="px-2.5 py-1.5 rounded-xl text-[10px] font-bold bg-blue-50 text-apple-blue uppercase">${m.type}</span>
+                                <span class="px-2.5 py-1.5 rounded-xl text-[10px] font-bold bg-gray-50 text-gray-500 uppercase">${m.course} КУРС</span>
+                            </div>
+                            <button onclick="event.stopPropagation(); toggleCategoryFav('${m.category}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all ${isCatFav ? 'bg-yellow-50 text-yellow-600 border-yellow-200' : 'bg-gray-50/50 text-gray-400 border-gray-100'}">
+                                <span class="text-[10px] font-bold uppercase">${m.category}</span>
+                                <i data-lucide="star" class="w-3.5 h-3.5 ${isCatFav ? 'fill-current' : ''} transition-none"></i>
+                            </button>
                         </div>
-                    </label>
-                    <div class="flex-1">
-                        <p class="font-bold text-gray-800 text-sm leading-tight ${t.done ? 'line-through text-gray-400' : ''}">${t.text}</p>
-                        <div class="flex items-center gap-2 mt-2">
-                            ${t.subject ? `<span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-2 py-1 rounded-lg border border-gray-100">${t.subject}</span>` : ''}
-                            <span class="text-[10px] font-bold ${t.urgent && !t.done ? 'text-red-500' : 'text-gray-400'} uppercase tracking-widest flex items-center gap-1">
-                                ${t.urgent && !t.done ? '<i data-lucide="flame" class="w-3 h-3 fill-current"></i>' : '<i data-lucide="calendar" class="w-3 h-3"></i>'} ${formatTaskDate(t.date)}
-                            </span>
+                        <h3 class="text-2xl font-bold text-apple-text mb-2 line-clamp-2 leading-tight tracking-tight">${m.title}</h3>
+                        <div class="flex items-center gap-2 mb-6">
+                            <i data-lucide="user" class="w-3 h-3 text-gray-300 transition-none"></i>
+                            <span class="text-xs font-medium text-gray-400 hover:text-apple-blue transition-colors underline underline-offset-4 decoration-gray-200 cursor-pointer" onclick="event.stopPropagation(); openUserProfile(${m.authorId})">${m.author}</span>
+                            <span class="w-1 h-1 rounded-full bg-gray-200"></span>
+                            <span class="text-xs font-medium text-gray-300">${m.date}</span>
                         </div>
+                        <div class="mb-6">${ai}</div>
                     </div>
-                    <button onclick="event.stopPropagation(); deleteTask(${t.id})" class="text-gray-300 hover:text-red-500 hover:bg-red-50 p-2 rounded-xl transition-all opacity-0 group-hover:opacity-100"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                </div>
-            `;
-
-            urgentList.innerHTML = urgentT.length ? urgentT.map(createCard).join('') : `<p class="text-xs text-gray-400 text-center py-4">Нет срочных задач</p>`;
-            upcomingList.innerHTML = upcomingT.length ? upcomingT.map(createCard).join('') : `<p class="text-xs text-gray-400 text-center py-4">Нет задач</p>`;
-            doneList.innerHTML = doneT.length ? doneT.map(createCard).join('') : `<p class="text-xs text-gray-400 text-center py-4">Список пуст</p>`;
-
-            const badge = document.getElementById('tasks-badge');
-            if(urgentT.length > 0) { badge.innerText = urgentT.length; badge.classList.remove('hidden'); } else badge.classList.add('hidden');
-
-            const sideList = document.getElementById('urgent-tasks-list');
-            const sideSection = document.getElementById('urgent-section');
-            if (urgentT.length > 0) {
-                sideSection.classList.remove('hidden');
-                sideList.innerHTML = urgentT.slice(0, 3).map(t => `<div onclick="switchView('tasks')" class="w-full p-3 rounded-2xl bg-red-50 border border-red-100 cursor-pointer transition-all hover:bg-red-100"><p class="text-[12px] font-bold text-gray-800 line-clamp-1">${t.text}</p></div>`).join('');
-            } else sideSection.classList.add('hidden');
-
+                    <div class="pt-6 border-t border-gray-50 flex items-center justify-between">
+                        <div class="flex gap-4">
+                            <button onclick="event.stopPropagation(); toggleLike(${m.id})" class="flex items-center gap-1.5 transition-colors ${m.isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}">
+                                <i data-lucide="heart" class="w-4 h-4 ${m.isLiked ? 'fill-current' : ''} transition-none"></i>
+                                <span class="text-xs font-bold">${m.likes}</span>
+                            </button>
+                            <button onclick="event.stopPropagation(); toggleMaterialFav(${m.id})" class="transition-colors ${m.isFav ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}">
+                                <i data-lucide="star" class="w-4 h-4 ${m.isFav ? 'fill-current' : ''} transition-none"></i>
+                            </button>
+                        </div>
+                        <a href="${downloadLink}" download onclick="event.stopPropagation()" class="bg-gray-100 text-gray-700 px-5 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-all shadow-sm active:scale-95">
+                            Скачать <i data-lucide="download" class="w-3.5 h-3.5 inline transition-none"></i>
+                        </a>
+                    </div>
+                </div>`;
+            }).join('');
             lucide.createIcons();
+        } catch (e) {
+            console.error("Ошибка в renderFeed:", e);
+        }
+    }
+
+    function renderStorage() {
+        const list = document.getElementById('storage-list');
+        const subjF = document.getElementById('storage-filter-subject').value;
+        const typeF = document.getElementById('storage-filter-type').value;
+        const subjSelect = document.getElementById('storage-filter-subject');
+        if (subjSelect.options.length === 1 && state.materials) {
+            [...new Set(state.materials.map(m => m.category))].sort().forEach(c => subjSelect.add(new Option(c, c)));
         }
 
-        function toggleTaskDone(id) {
-            const task = state.tasks.find(t => t.id === id);
-            if(task) { task.done = !task.done; renderAllUI(); }
+        if(!state.materials) return;
+
+        const myFiles = state.materials.filter(m => {
+            const isMine = m.authorId === state.user.id;
+            const matchSubj = subjF === 'All' || m.category === subjF;
+            const matchType = typeF === 'All' || m.type === typeF;
+            return isMine && matchSubj && matchType;
+        });
+
+        document.getElementById('storage-count').innerText = myFiles.length;
+        if (myFiles.length === 0) {
+            list.innerHTML = `<tr><td colspan="4" class="px-8 py-20 text-center text-gray-400 font-semibold uppercase tracking-widest text-xs">Нет файлов по заданным фильтрам</td></tr>`;
+            return;
+        }
+        list.innerHTML = myFiles.map(m => {
+            let downloadLink = (m.files && m.files.length > 0) ? "/download/" + m.files[0].id : "#";
+            return `<tr class="hover:bg-gray-50/80 cursor-pointer transition-all group" onclick="openEditModal(${m.id})"><td class="px-8 py-6"><div class="flex items-center gap-4"><div class="p-3 bg-blue-50 text-apple-blue rounded-2xl group-hover:scale-105 transition-transform"><i data-lucide="file-text" class="w-6 h-6"></i></div><div><p class="font-bold text-apple-text tracking-tight">${m.title}</p><p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">${m.date} • ${m.type}</p></div></div></td><td class="px-8 py-6"><span class="px-3 py-1 bg-gray-100 rounded-lg text-[10px] font-bold text-gray-500 uppercase tracking-widest">${m.category}</span></td><td class="px-8 py-6">${m.isPrivate ? '<div class="flex items-center gap-2"><i data-lucide="lock" class="w-4 h-4 text-amber-500"></i><span class="text-xs text-gray-400 font-medium">Личное</span></div>' : '<div class="flex items-center gap-2"><i data-lucide="globe" class="w-4 h-4 text-green-500"></i><span class="text-xs text-gray-400 font-medium">Публичное</span></div>'}</td><td class="px-8 py-6 text-right"><div class="flex justify-end gap-2"><a href="${downloadLink}" download onclick="event.stopPropagation()" class="p-2.5 bg-gray-50 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all" title="Скачать"><i data-lucide="download" class="w-4 h-4"></i></a><button onclick="event.stopPropagation(); openEditModal(${m.id})" class="p-2.5 bg-gray-50 text-gray-400 hover:text-apple-blue hover:bg-white hover:shadow-sm rounded-xl transition-all" title="Редактировать"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button onclick="event.stopPropagation(); deleteMaterial(${m.id})" class="p-2.5 bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all" title="Удалить"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td></tr>`
+        }).join('');
+        lucide.createIcons();
+    }
+
+    function resetFeedFilters() { document.getElementById('filter-subject').value = 'All'; document.getElementById('filter-course').value = 'All'; document.getElementById('filter-type').value = 'All'; renderFeed(); }
+    function resetStorageFilters() { document.getElementById('storage-filter-subject').value = 'All'; document.getElementById('storage-filter-type').value = 'All'; renderStorage(); }
+
+    function openDetail(id) {
+        const m = state.materials.find(x => x.id === id);
+        state.currentMaterialId = id;
+
+        document.getElementById('md-title').innerText = m.title;
+        document.getElementById('md-cat').innerText = m.category;
+        document.getElementById('md-date').innerText = m.date;
+        document.getElementById('md-author-name').innerText = m.author;
+        document.getElementById('md-author-avatar').innerText = m.author.charAt(0);
+        document.getElementById('md-desc').innerText = m.desc || "";
+
+        document.getElementById('md-likes-stat').innerText = m.likes;
+        document.getElementById('md-downloads-stat').innerText = m.downloads;
+        document.getElementById('md-views-stat').innerText = m.views;
+
+        if (m.files && m.files.length > 0) {
+            document.getElementById('md-download-link').href = "/download/" + m.files[0].id;
+        } else {
+            document.getElementById('md-download-link').href = "#";
         }
 
-        function deleteTask(id) {
-            if(confirm("Удалить задачу?")) { state.tasks = state.tasks.filter(t => t.id !== id); renderAllUI(); }
+        fetch(`/api/view/${id}`, { method: "POST" })
+            .then(res => {
+                if (res.ok) {
+                    m.views += 1;
+                    document.getElementById('md-views-stat').innerText = m.views;
+                }
+            });
+
+        const aiC = document.getElementById('md-ai-container');
+        if (m.aiStatus === 'loading') {
+            aiC.innerHTML = `<div class="rounded-[2rem] bg-gray-50 border border-gray-100 p-8 flex items-center justify-center min-h-[150px]"><div class="flex flex-col items-center gap-3 text-gray-400"><i data-lucide="loader-2" class="w-8 h-8 animate-spin text-indigo-500"></i><span class="text-[10px] font-bold uppercase uppercase">Анализ...</span></div></div>`;
+        } else if (m.aiStatus === 'ready') {
+            aiC.innerHTML = `<div class="relative overflow-hidden rounded-[2rem] bg-[#F4F5FF] border border-indigo-100 p-8 shadow-inner"><div class="relative z-10"><div class="flex items-center gap-2.5 mb-4"><div class="p-2 bg-white rounded-xl shadow-sm text-indigo-600 transition-none"><i data-lucide="bot" class="w-5 h-5"></i></div><h3 class="text-[11px] font-bold text-indigo-900 uppercase tracking-[0.15em]">AI Анализ содержания</h3></div><p class="text-gray-700 font-semibold text-sm leading-relaxed">${m.ai}</p></div><i data-lucide="bot" class="absolute -bottom-4 -right-4 w-32 h-32 text-indigo-500/5 rotate-12 pointer-events-none transition-none"></i></div>`;
+        } else {
+            aiC.innerHTML = `<button onclick="generateAI(${m.id}, event)" class="w-full py-6 rounded-[2rem] border-2 border-dashed border-purple-200 text-purple-600 transition-all text-sm font-bold uppercase tracking-widest flex items-center justify-center gap-3 group hover:bg-purple-50 hover:border-purple-300"><i data-lucide="sparkles" class="w-6 h-6 transition-none group-hover:scale-110"></i> Запустить AI Анализ материала</button>`;
         }
 
-        function handleDeleteTaskCurrent() {
-            const id = document.getElementById('mt-id').value;
-            if (id) { deleteTask(parseInt(id)); closeModal('modal-task'); }
+        const filesContainer = document.getElementById('md-file-card-container');
+        if (m.files && m.files.length > 0) {
+            filesContainer.innerHTML = m.files.map(f => {
+                let iconColor = "text-red-500 bg-red-50";
+                let iconName = "file-text";
+                const ext = f.ext ? f.ext.toLowerCase() : 'file';
+                if (['doc', 'docx'].includes(ext)) iconColor = "text-blue-500 bg-blue-50";
+                else if (['ppt', 'pptx'].includes(ext)) iconColor = "text-orange-500 bg-orange-50";
+                else if (['zip', 'rar'].includes(ext)) { iconColor = "text-gray-500 bg-gray-50"; iconName = "archive"; }
+
+                return `
+                <div class="p-4 rounded-2xl border border-gray-100 flex items-center justify-between mt-3 hover:bg-gray-50 transition-colors">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl ${iconColor} flex items-center justify-center"><i data-lucide="${iconName}" class="w-6 h-6"></i></div>
+                        <div><p class="font-bold text-sm text-gray-800 line-clamp-1">${f.name}</p><p class="text-xs text-gray-400 font-bold uppercase tracking-wider">${f.size}</p></div>
+                    </div>
+                    <a href="/download/${f.id}" class="p-3 bg-white border border-gray-200 rounded-xl text-apple-blue hover:bg-blue-50 transition-all font-bold text-xs uppercase tracking-widest shadow-sm">Скачать</a>
+                </div>`;
+            }).join('');
+        } else {
+            filesContainer.innerHTML = `<div class="text-center py-4 text-gray-400 text-xs font-bold uppercase tracking-widest">Файлы не найдены</div>`;
         }
 
-        function openTaskModal() {
-            document.querySelector('#modal-task form').reset();
-            document.getElementById('mt-head').innerText = "Новая задача";
-            document.getElementById('mt-submit-btn').innerText = "Добавить";
-            document.getElementById('mt-id').value = "";
-            document.getElementById('mt-delete-btn').classList.add('hidden');
+        const likeBtn = document.getElementById('md-like-btn');
+        likeBtn.innerHTML = `<i data-lucide="heart" class="w-5 h-5 ${m.isLiked ? 'fill-current' : ''} transition-none"></i> <span>${m.likes}</span>`;
+        likeBtn.className = `flex items-center gap-2 px-6 py-4 rounded-2xl border font-bold text-sm transition-all ${m.isLiked ? 'bg-red-50 border-red-200 text-red-500' : 'bg-white border-gray-100 text-gray-500'}`;
+        likeBtn.onclick = () => toggleLike(m.id);
 
+        const favBtn = document.getElementById('md-fav-btn');
+        favBtn.innerHTML = `<i data-lucide="star" class="w-6 h-6 ${m.isFav ? 'fill-current' : ''} transition-none"></i>`;
+        favBtn.className = `p-4 rounded-2xl border transition-all ${m.isFav ? 'bg-yellow-50 border-yellow-200 text-yellow-500' : 'bg-white border-gray-100 text-gray-400'}`;
+        favBtn.onclick = () => { m.isFav = !m.isFav; renderAllUI(); };
+
+        document.getElementById('md-author-trigger').onclick = () => { closeModal('modal-detail'); setTimeout(() => openUserProfile(m.authorId), 300); };
+        openModal('modal-detail');
+        lucide.createIcons();
+    }
+
+    // === ФУНКЦИИ ВЗАИМОДЕЙСТВИЯ ===
+    async function generateAI(id, event) {
+        if(event) event.stopPropagation();
+        const m = state.materials.find(x => x.id === id);
+        m.aiStatus = 'loading';
+        renderAllUI();
+        if(state.currentMaterialId === id) openDetail(id);
+
+        const formData = new FormData();
+        formData.append("material_id", id);
+        formData.append("email", state.user.email);
+
+        try {
+            const response = await fetch("/api/ai/analyze", { method: "POST", body: formData });
+            const data = await response.json();
+            if (data.status === "ok") {
+                m.ai = data.ai;
+                m.aiStatus = 'ready';
+                state.expandedAI.push(id);
+            } else {
+                m.aiStatus = 'none';
+                alert(data.error || "Ошибка");
+            }
+        } catch (e) {
+            console.error(e);
+            m.aiStatus = 'none';
+        } finally {
+            renderAllUI();
+            if(state.currentMaterialId === id) openDetail(id);
+        }
+    }
+
+    async function toggleLike(id) {
+        const m = state.materials.find(x => x.id === id);
+        if (!m) return;
+        m.isLiked = !m.isLiked;
+        m.likes += m.isLiked ? 1 : -1;
+        renderAllUI();
+        if(state.currentMaterialId === id) { document.getElementById('md-like-btn').innerHTML = `<i data-lucide="heart" class="w-5 h-5 ${m.isLiked ? 'fill-current' : ''} transition-none"></i> <span>${m.likes}</span>`; }
+
+        const formData = new FormData();
+        formData.append("material_id", id);
+        formData.append("email", state.user.email);
+        try { await fetch("/toggle_like", { method: "POST", body: formData }); } catch (e) { console.error(e); }
+    }
+
+    async function toggleMaterialFav(id) {
+        const m = state.materials.find(x => x.id === id);
+        m.isFav = !m.isFav;
+        renderAllUI();
+        if(state.currentMaterialId === id) {
+            const favBtn = document.getElementById('md-fav-btn');
+            if(favBtn) {
+                favBtn.innerHTML = `<i data-lucide="star" class="w-6 h-6 ${m.isFav ? 'fill-current' : ''} transition-none"></i>`;
+                favBtn.className = `p-4 rounded-2xl border transition-all ${m.isFav ? 'bg-yellow-50 border-yellow-200 text-yellow-500' : 'bg-white border-gray-100 text-gray-400'}`;
+            }
+        }
+        const formData = new FormData();
+        formData.append("material_id", id);
+        formData.append("email", state.user.email);
+        try { await fetch("/toggle_fav", { method: "POST", body: formData }); } catch (e) { console.error(e); }
+    }
+    async function toggleCategoryFav(cat) {
+        if (state.favoriteCategories.includes(cat)) { state.favoriteCategories = state.favoriteCategories.filter(c => c !== cat); }
+        else { state.favoriteCategories.push(cat); }
+        renderAllUI();
+        const formData = new FormData();
+        formData.append("email", state.user.email);
+        formData.append("categories", JSON.stringify(state.favoriteCategories));
+        try { await fetch("/api/update_fav_cats", { method: "POST", body: formData }); } catch(e) { console.error(e); }
+    }
+    function goToFeedFilter(cat) { document.getElementById('filter-course').value = 'All'; document.getElementById('filter-type').value = 'All'; const subjectSelect = document.getElementById('filter-subject'); if (subjectSelect.options.length === 1) { [...new Set(state.materials.map(m => m.category))].sort().forEach(c => subjectSelect.add(new Option(c, c))); } subjectSelect.value = cat; switchView('feed'); renderFeed(); }
+    function handleShare(event) { if(event) event.stopPropagation(); navigator.clipboard.writeText(window.location.href).then(() => { const sIcon = document.getElementById('share-icon'), cIcon = document.getElementById('check-icon'), btn = document.getElementById('share-btn'); sIcon.classList.add('hidden'); cIcon.classList.remove('hidden'); btn.classList.add('bg-green-50', 'border-green-200'); setTimeout(() => { sIcon.classList.remove('hidden'); cIcon.classList.add('hidden'); btn.classList.remove('bg-green-50', 'border-green-200'); }, 2000); }); }
+    function toggleAISummary(id, event) { if(event) event.stopPropagation(); const idx = state.expandedAI.indexOf(id); if(idx > -1) state.expandedAI.splice(idx, 1); else state.expandedAI.push(id); renderFeed(); if(document.getElementById('view-favorites').classList.contains('active')) renderFavorites(); }
+
+    // === ПРОФИЛЬ, НАСТРОЙКИ, ЗАДАЧИ ===
+    async function openUserProfile(id) {
+        if (id === state.user.id) { fillProfileModal(state.user); openModal('modal-profile'); return; }
+        document.getElementById('up-name').innerText = "Загрузка...";
+        openModal('modal-profile');
+        try {
+            const response = await fetch(`/api/profile/${id}`);
+            if (response.ok) { const userData = await response.json(); fillProfileModal(userData); }
+        } catch (e) { console.error(e); }
+    }
+
+    function fillProfileModal(u) {
+        const upAvatar = document.getElementById('up-avatar');
+        const upImg = document.getElementById('up-avatar-img');
+        if (u.avatarUrl) { upAvatar.classList.add('hidden'); upImg.src = u.avatarUrl; upImg.classList.remove('hidden'); }
+        else { upAvatar.innerText = u.name.charAt(0); upAvatar.classList.remove('hidden'); upImg.classList.add('hidden'); }
+        document.getElementById('up-name').innerText = u.name;
+        document.getElementById('up-uni').innerText = u.university;
+        document.getElementById('up-bio').innerText = u.bio;
+        document.getElementById('up-downloads').innerText = u.downloads || 0;
+        document.getElementById('up-rating').innerText = u.rating || "1.0";
+        const courseEl = document.getElementById('up-course');
+        if(u.course) { courseEl.innerText = u.course + "-й курс"; courseEl.parentElement.parentElement.classList.remove('hidden'); } else { courseEl.parentElement.parentElement.classList.add('hidden'); }
+        const tgEl = document.getElementById('up-tg');
+        const tgRow = tgEl.parentElement.parentElement;
+        if (u.telegram === "Скрыто") { tgEl.innerText = "Скрыто"; tgEl.removeAttribute("href"); tgEl.classList.add("text-gray-400", "cursor-default"); tgRow.classList.remove('hidden'); }
+        else if (u.telegram) { tgEl.innerText = u.telegram; tgEl.href = "https://t.me/" + u.telegram.replace('@', ''); tgEl.classList.remove("text-gray-400", "cursor-default"); tgRow.classList.remove('hidden'); }
+        else { tgRow.classList.add('hidden'); }
+    }
+
+    function renderFavorites() {
+        const catList = document.getElementById('fav-categories-list');
+        const grid = document.getElementById('fav-grid');
+        if (state.favoriteCategories.length === 0) { catList.innerHTML = `<p class="text-xs text-gray-400">Нет избранных предметов</p>`; }
+        else { catList.innerHTML = state.favoriteCategories.map(cat => `<div class="inline-flex items-center rounded-2xl bg-yellow-50 border border-yellow-200 shadow-sm hover:shadow-md transition-all"><button onclick="goToFeedFilter('${cat}')" class="px-4 py-2.5 text-yellow-700 font-bold text-[10px] uppercase tracking-widest hover:bg-yellow-100 rounded-l-2xl transition-colors" title="Перейти к материалам">${cat}</button><div class="w-px h-4 bg-yellow-200/50"></div><button onclick="toggleCategoryFav('${cat}')" class="px-3 py-2.5 text-yellow-600 hover:text-red-500 hover:bg-red-50 rounded-r-2xl transition-colors" title="Удалить из избранного"><i data-lucide="x" class="w-3 h-3"></i></button></div>`).join(''); }
+        const favMaterials = state.materials.filter(m => m.isFav);
+        if (favMaterials.length === 0) { grid.innerHTML = `<div class="col-span-full py-20 text-center text-gray-400 font-semibold uppercase tracking-widest text-xs">У вас пока нет сохраненных материалов</div>`; }
+        else { grid.innerHTML = favMaterials.map(m => {
+            const isExpanded = state.expandedAI.includes(m.id);
+            const isCatFav = state.favoriteCategories.includes(m.category);
+            let downloadLink = (m.files && m.files.length > 0) ? "/download/" + m.files[0].id : "#";
+            let ai = '';
+            if(m.aiStatus === 'loading') ai = `<button class="w-full py-3 rounded-2xl bg-gray-100 text-[11px] font-bold uppercase flex items-center justify-center gap-2 cursor-wait"><i data-lucide="loader-2" class="w-4 h-4 animate-spin text-indigo-500"></i> Генерирую...</button>`;
+            else if(m.aiStatus === 'ready') ai = `<button onclick="toggleAISummary(${m.id}, event)" class="w-full py-3 rounded-2xl bg-gradient-to-r from-violet-50 to-purple-50 text-purple-700 text-[11px] font-bold uppercase border border-purple-100 flex items-center justify-center gap-2 shadow-sm">AI Анализ <i data-lucide="chevron-down" class="w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}"></i></button>${isExpanded ? `<div class="mt-3 p-4 bg-purple-50/50 rounded-2xl border border-purple-100 flex gap-3 animate-fade-in"><div class="flex-shrink-0 mt-0.5"><i data-lucide="bot" class="w-5 h-5 text-purple-600 transition-none"></i></div><p class="text-[11px] text-gray-700 font-semibold">${m.ai}</p></div>` : ''}`;
+            else ai = `<button onclick="generateAI(${m.id}, event)" class="w-full py-3 rounded-2xl border-2 border-dashed border-purple-200 text-purple-600 hover:bg-purple-50 transition-all text-[11px] font-bold uppercase flex items-center justify-center gap-2"><i data-lucide="sparkles" class="w-3.5 h-3.5 transition-none"></i> Создать AI обзор</button>`;
+            return `
+            <div class="bg-white p-7 rounded-[2.5rem] shadow-sm border border-gray-50 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-500 cursor-pointer flex flex-col justify-between group" onclick="openDetail(${m.id})">
+                <div>
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="flex gap-2">
+                            <span class="px-2.5 py-1.5 rounded-xl text-[10px] font-bold bg-blue-50 text-apple-blue uppercase">${m.type}</span>
+                            <span class="px-2.5 py-1.5 rounded-xl text-[10px] font-bold bg-gray-50 text-gray-500 uppercase">${m.course} КУРС</span>
+                        </div>
+                        <button onclick="event.stopPropagation(); toggleCategoryFav('${m.category}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all ${isCatFav ? 'bg-yellow-50 text-yellow-600 border-yellow-200' : 'bg-gray-50/50 text-gray-400 border-gray-100'}">
+                            <span class="text-[10px] font-bold uppercase">${m.category}</span>
+                            <i data-lucide="star" class="w-3.5 h-3.5 ${isCatFav ? 'fill-current' : ''} transition-none"></i>
+                        </button>
+                    </div>
+                    <h3 class="text-2xl font-bold text-apple-text mb-2 line-clamp-2 leading-tight tracking-tight">${m.title}</h3>
+                    <div class="flex items-center gap-2 mb-6">
+                        <i data-lucide="user" class="w-3 h-3 text-gray-300 transition-none"></i>
+                        <span class="text-xs font-medium text-gray-400 hover:text-apple-blue transition-colors underline underline-offset-4 decoration-gray-200 cursor-pointer" onclick="event.stopPropagation(); openUserProfile(${m.authorId})">${m.author}</span>
+                        <span class="w-1 h-1 rounded-full bg-gray-200"></span>
+                        <span class="text-xs font-medium text-gray-300">${m.date}</span>
+                    </div>
+                    <div class="mb-6">${ai}</div>
+                </div>
+                <div class="pt-6 border-t border-gray-50 flex items-center justify-between">
+                    <div class="flex gap-4">
+                        <button onclick="event.stopPropagation(); toggleLike(${m.id})" class="flex items-center gap-1.5 transition-colors ${m.isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}">
+                            <i data-lucide="heart" class="w-4 h-4 ${m.isLiked ? 'fill-current' : ''} transition-none"></i>
+                            <span class="text-xs font-bold">${m.likes}</span>
+                        </button>
+                        <button onclick="event.stopPropagation(); toggleMaterialFav(${m.id})" class="transition-colors ${m.isFav ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}">
+                            <i data-lucide="star" class="w-4 h-4 ${m.isFav ? 'fill-current' : ''} transition-none"></i>
+                        </button>
+                    </div>
+                    <a href="${downloadLink}" download onclick="event.stopPropagation()" class="bg-gray-100 text-gray-700 px-5 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-all shadow-sm active:scale-95">
+                        Скачать <i data-lucide="download" class="w-3.5 h-3.5 inline transition-none"></i>
+                    </a>
+                </div>
+            </div>`;
+        }).join(''); }
+        lucide.createIcons();
+    }
+
+    function renderSidebar() {
+        document.getElementById('sb-user-name').innerText = state.user.name;
+        const sbText = document.getElementById('sb-avatar-text');
+        const sbImg = document.getElementById('sb-avatar-img');
+        if(state.user.avatarUrl) { sbText.classList.add('hidden'); sbImg.src = state.user.avatarUrl; sbImg.classList.remove('hidden'); }
+        else { sbText.innerText = state.user.name.charAt(0); sbText.classList.remove('hidden'); sbImg.classList.add('hidden'); }
+        const tasks = state.user.tasks || [];
+        const urgentT = tasks.filter(t => t.urgent && !t.done);
+        const badge = document.getElementById('tasks-badge');
+        if(urgentT.length > 0) { badge.innerText = urgentT.length; badge.classList.remove('hidden'); } else badge.classList.add('hidden');
+        const list = document.getElementById('urgent-tasks-list');
+        const section = document.getElementById('urgent-section');
+        if (urgentT.length > 0) {
+            section.classList.remove('hidden');
+            list.innerHTML = urgentT.slice(0, 3).map(t => `
+                <div onclick="switchView('tasks')" class="w-full p-3 rounded-2xl bg-red-50 border border-red-100 cursor-pointer transition-all hover:bg-red-100 group">
+                    <p class="text-[11px] font-bold text-gray-800 line-clamp-1">${t.text}</p>
+                    <div class="flex items-center gap-1 mt-1">
+                         <i data-lucide="clock" class="w-3 h-3 text-red-400"></i>
+                         <p class="text-[9px] text-red-400 font-bold">${t.deadline ? t.deadline.split(' ')[0] : 'Срочно'}</p>
+                    </div>
+                </div>`
+            ).join('');
+        } else { section.classList.add('hidden'); }
+    }
+
+    function initSettingsFields() {
+        document.getElementById('set-card-name').innerText = state.user.name;
+        document.getElementById('set-card-email').innerText = state.user.email;
+        const cardAvatarText = document.getElementById('set-card-avatar-text');
+        const cardAvatarImg = document.getElementById('set-card-avatar-img');
+        if (state.user.avatarUrl) { cardAvatarText.classList.add('hidden'); cardAvatarImg.src = state.user.avatarUrl; cardAvatarImg.classList.remove('hidden'); }
+        else { cardAvatarText.innerText = state.user.name.charAt(0); cardAvatarText.classList.remove('hidden'); cardAvatarImg.classList.add('hidden'); }
+        document.getElementById('set-user-name').value = state.user.name;
+        document.getElementById('set-user-age').value = state.user.age || "";
+        document.getElementById('set-user-uni').value = state.user.university;
+        document.getElementById('set-user-course').value = state.user.course;
+        document.getElementById('set-user-bio').value = state.user.bio;
+        document.getElementById('set-user-email').value = state.user.email;
+        document.getElementById('set-user-tg').value = state.user.telegram;
+        document.getElementById('toggle-bio').checked = state.user.privacy.bio;
+        document.getElementById('toggle-uni').checked = state.user.privacy.uni;
+        document.getElementById('toggle-tg').checked = state.user.privacy.tg;
+        document.getElementById('set-stat-downloads').innerText = state.user.downloads || 0;
+        document.getElementById('set-stat-rating').innerText = state.user.rating || "1.0";
+    }
+
+    async function saveSettings() {
+        const btn = document.querySelector('#view-settings button');
+        const originalText = btn.innerText;
+        btn.innerText = "Сохраняем...";
+        btn.disabled = true;
+        const formData = new FormData();
+        formData.append("email", state.user.email);
+        formData.append("name", document.getElementById('set-user-name').value);
+        formData.append("age", document.getElementById('set-user-age').value);
+        formData.append("university", document.getElementById('set-user-uni').value);
+        formData.append("course", document.getElementById('set-user-course').value);
+        formData.append("bio", document.getElementById('set-user-bio').value);
+        formData.append("telegram", document.getElementById('set-user-tg').value);
+        const privacy = { bio: document.getElementById('toggle-bio').checked, uni: document.getElementById('toggle-uni').checked, tg: document.getElementById('toggle-tg').checked };
+        formData.append("privacy", JSON.stringify(privacy));
+        if (state.newAvatarFile) { formData.append("avatar", state.newAvatarFile); }
+        try {
+            const response = await fetch("/update_profile", { method: "POST", body: formData });
+            if (response.ok) {
+                const result = await response.json();
+                if(result.avatarUrl) { state.user.avatarUrl = "/static/" + result.avatarUrl; }
+                state.user.name = document.getElementById('set-user-name').value;
+                state.user.privacy = privacy;
+                alert("Профиль обновлен!");
+                renderSidebar();
+                initSettingsFields();
+            } else alert("Ошибка при сохранении");
+        } catch (e) { console.error(e); alert("Ошибка соединения"); } finally { btn.innerText = originalText; btn.disabled = false; }
+    }
+
+    function handleAvatarUpload(input) {
+        if (input.files && input.files[0]) {
+            state.newAvatarFile = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const upImg = document.getElementById('up-avatar-img'), cardImg = document.getElementById('set-card-avatar-img'), sbImg = document.getElementById('sb-avatar-img');
+                [upImg, cardImg, sbImg].forEach(img => { if(img) { img.src = e.target.result; img.classList.remove('hidden'); } });
+                [document.getElementById('up-avatar'), document.getElementById('set-card-avatar-text'), document.getElementById('sb-avatar-text')].forEach(el => { if(el) el.classList.add('hidden'); });
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // === ЗАДАЧИ: ОТОБРАЖЕНИЕ (С ПРОВЕРКОЙ ПРОСРОЧКИ) ===
+    function renderTasks() {
+        const tasks = state.user.tasks || [];
+        const urgentList = document.getElementById('tasks-urgent-list');
+        const upcomingList = document.getElementById('tasks-upcoming-list');
+        const doneList = document.getElementById('tasks-done-list');
+
+        urgentList.innerHTML = ''; upcomingList.innerHTML = ''; doneList.innerHTML = '';
+        let countUrgent = 0; let countUpcoming = 0; let countDone = 0;
+        const now = new Date();
+
+        tasks.forEach(t => {
+            let dateHtml = '';
+            let isOverdue = false;
+            if(t.deadline) {
+                const safeDate = t.deadline.replace(' ', 'T');
+                const dateObj = new Date(safeDate);
+                if (!isNaN(dateObj.getTime())) {
+                    if (!t.done) {
+                        const isNoTime = (dateObj.getHours() === 0 && dateObj.getMinutes() === 0);
+                        if (isNoTime) {
+                            const todayZero = new Date(); todayZero.setHours(0,0,0,0);
+                            const deadlineZero = new Date(dateObj); deadlineZero.setHours(0,0,0,0);
+                            if (todayZero > deadlineZero) isOverdue = true;
+                        } else {
+                            if (now > dateObj) isOverdue = true;
+                        }
+                    }
+                    const day = dateObj.getDate().toString().padStart(2, '0');
+                    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+                    const hours = dateObj.getHours().toString().padStart(2, '0');
+                    const mins = dateObj.getMinutes().toString().padStart(2, '0');
+                    const timeStr = (hours === '00' && mins === '00') ? '' : ` в ${hours}:${mins}`;
+
+                    let colorClass = 'text-gray-400';
+                    let extraText = '';
+                    let icon = 'clock';
+                    if (t.done) { colorClass = 'text-gray-400'; }
+                    else if (isOverdue) { colorClass = 'text-red-600'; extraText = ' (Просрочено)'; icon = 'alert-circle'; }
+                    else if (t.urgent) { colorClass = 'text-red-400'; }
+                    dateHtml = `<div class="flex items-center gap-1.5 mt-2 text-xs font-bold ${colorClass}"><i data-lucide="${icon}" class="w-3.5 h-3.5"></i> ${day}.${month}${timeStr}${extraText}</div>`;
+                }
+            }
+
+            const cardHtml = `
+            <div class="group bg-white p-5 rounded-2xl border ${t.done ? 'border-gray-100 opacity-60' : (isOverdue ? 'border-red-200 bg-red-50/40' : (t.urgent ? 'border-red-100 bg-red-50/30' : 'border-gray-100'))} shadow-sm hover:shadow-md transition-all relative">
+                <div class="flex items-start gap-3">
+                    <button onclick="toggleTaskDone(${t.id}); event.stopPropagation();" class="mt-0.5 w-5 h-5 rounded-lg border-2 ${t.done ? 'bg-green-500 border-green-500' : 'border-gray-300 hover:border-apple-blue'} flex items-center justify-center transition-colors">
+                        ${t.done ? '<i data-lucide="check" class="w-3.5 h-3.5 text-white"></i>' : ''}
+                    </button>
+                    <div class="flex-1 cursor-pointer" onclick="openEditTaskModal(${t.id})">
+                        <p class="text-sm font-bold text-gray-800 ${t.done ? 'line-through text-gray-400' : ''}">${t.text}</p>
+                        ${t.subject ? `<p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-1">${t.subject}</p>` : ''}
+                        ${dateHtml}
+                    </div>
+                    <button onclick="deleteTask(${t.id}); event.stopPropagation();" class="opacity-0 group-hover:opacity-100 p-2 text-gray-300 hover:text-red-500 transition-all"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            </div>`;
+
+            if (t.done) { doneList.innerHTML += cardHtml; countDone++; }
+            else if (isOverdue || t.urgent) { urgentList.innerHTML += cardHtml; countUrgent++; }
+            else { upcomingList.innerHTML += cardHtml; countUpcoming++; }
+        });
+
+        document.getElementById('task-count-urgent').innerText = countUrgent;
+        document.getElementById('task-count-upcoming').innerText = countUpcoming;
+        document.getElementById('task-count-done').innerText = countDone;
+        const badge = document.getElementById('tasks-badge');
+        if(countUrgent > 0) { badge.innerText = countUrgent; badge.classList.remove('hidden'); }
+        else { badge.classList.add('hidden'); }
+        renderSidebar();
+        lucide.createIcons();
+    }
+
+    function openEditTaskModal(id) {
+        const task = state.user.tasks.find(t => t.id === id);
+        if(!task) return;
+        document.getElementById('mt-head').innerText = "Редактировать";
+        document.getElementById('mt-submit-btn').innerText = "Сохранить";
+        document.getElementById('mt-id').value = task.id;
+        document.getElementById('mt-text').value = task.text;
+        document.getElementById('mt-subj').value = task.subject || "";
+        if (task.deadline) {
+            const parts = task.deadline.split(' ');
+            document.getElementById('mt-date-part').value = parts[0];
+            if(parts.length > 1) { document.getElementById('mt-time-part').value = parts[1]; }
+            else { document.getElementById('mt-time-part').value = ""; }
+        } else {
             document.getElementById('mt-date-part').value = "";
             document.getElementById('mt-time-part').value = "";
-
-            setTaskUrgent(false);
-            openModal('modal-task');
         }
+        const check = document.getElementById('mt-urgent-check');
+        check.checked = task.urgent;
+        const bg = document.getElementById('mt-switch-bg');
+        const dot = document.getElementById('mt-switch-dot');
+        if(task.urgent) { bg.classList.replace('bg-gray-300', 'bg-red-500'); dot.classList.replace('translate-x-0', 'translate-x-6'); }
+        else { bg.classList.replace('bg-red-500', 'bg-gray-300'); dot.classList.replace('translate-x-6', 'translate-x-0'); }
+        document.getElementById('mt-delete-btn').classList.remove('hidden');
+        openModal('modal-task');
+    }
 
-        function openEditTaskModal(id) {
-            const t = state.tasks.find(x => x.id === id);
-            if(!t) return;
+    function openTaskModal() {
+        document.querySelector('#modal-task form').reset();
+        document.getElementById('mt-head').innerText = "Новая задача";
+        document.getElementById('mt-submit-btn').innerText = "Добавить";
+        document.getElementById('mt-id').value = "";
+        document.getElementById('mt-delete-btn').classList.add('hidden');
+        const check = document.getElementById('mt-urgent-check');
+        check.checked = false;
+        document.getElementById('mt-switch-bg').classList.replace('bg-red-500', 'bg-gray-300');
+        document.getElementById('mt-switch-dot').classList.replace('translate-x-6', 'translate-x-0');
+        openModal('modal-task');
+    }
 
-            document.getElementById('mt-head').innerText = "Редактирование задачи";
-            document.getElementById('mt-submit-btn').innerText = "Сохранить";
-            document.getElementById('mt-id').value = t.id;
-            document.getElementById('mt-text').value = t.text;
-            document.getElementById('mt-subj').value = t.subject || "";
+    async function handleTaskSubmit(e) {
+        e.preventDefault();
+        const btn = document.getElementById('mt-submit-btn');
+        const originalText = btn.innerText;
+        btn.innerText = "Сохраняем...";
+        btn.disabled = true;
+        const taskId = document.getElementById('mt-id').value;
+        const formData = new FormData();
+        formData.append("email", state.user.email);
+        formData.append("text", document.getElementById('mt-text').value);
+        formData.append("subject", document.getElementById('mt-subj').value);
+        formData.append("date", document.getElementById('mt-date-part').value);
+        formData.append("time", document.getElementById('mt-time-part').value);
+        formData.append("is_urgent", document.getElementById('mt-urgent-check').checked);
+        if (taskId) { formData.append("task_id", taskId); }
+        const url = taskId ? "/api/task/edit" : "/api/task/add";
+        try {
+            const response = await fetch(url, { method: "POST", body: formData });
+            if (response.ok) { window.location.reload(); } else { alert("Ошибка при сохранении задачи"); }
+        } catch (error) { console.error(error); } finally { btn.innerText = originalText; btn.disabled = false; }
+    }
 
-            if(t.date && t.date.includes('T')) {
-                const parts = t.date.split('T');
-                document.getElementById('mt-date-part').value = parts[0];
-                document.getElementById('mt-time-part').value = parts[1];
-            } else {
-                document.getElementById('mt-date-part').value = "";
-                document.getElementById('mt-time-part').value = "";
-            }
+    async function toggleTaskDone(id) {
+        const task = state.user.tasks.find(t => t.id === id);
+        if(task) { task.done = !task.done; renderTasks(); }
+        const formData = new FormData();
+        formData.append("task_id", id);
+        formData.append("email", state.user.email);
+        try { await fetch("/api/task/toggle_done", { method: "POST", body: formData }); }
+        catch(e) { console.error(e); }
+    }
 
-            document.getElementById('mt-delete-btn').classList.remove('hidden');
-            setTaskUrgent(t.urgent);
-            openModal('modal-task');
-        }
+    async function deleteTask(id) {
+        if(!confirm("Удалить задачу?")) return;
+        state.user.tasks = state.user.tasks.filter(t => t.id !== id);
+        renderTasks();
+        const formData = new FormData();
+        formData.append("task_id", id);
+        formData.append("email", state.user.email);
+        try { await fetch("/api/task/delete", { method: "POST", body: formData }); }
+        catch(e) { console.error(e); }
+    }
 
-        function toggleTaskUrgent() {
-            const check = document.getElementById('mt-urgent-check');
-            setTaskUrgent(!check.checked);
-        }
+    function toggleTaskUrgent() {
+        const check = document.getElementById('mt-urgent-check');
+        const bg = document.getElementById('mt-switch-bg');
+        const dot = document.getElementById('mt-switch-dot');
+        check.checked = !check.checked;
+        if(check.checked) { bg.classList.replace('bg-gray-300', 'bg-red-500'); dot.classList.replace('translate-x-0', 'translate-x-6'); }
+        else { bg.classList.replace('bg-red-500', 'bg-gray-300'); dot.classList.replace('translate-x-6', 'translate-x-0'); }
+    }
 
-        function setTaskUrgent(isUrgent) {
-            const check = document.getElementById('mt-urgent-check');
-            const bg = document.getElementById('mt-switch-bg');
-            const dot = document.getElementById('mt-switch-dot');
-            check.checked = isUrgent;
-            if(isUrgent) { bg.classList.replace('bg-gray-300', 'bg-red-500'); dot.classList.replace('translate-x-0', 'translate-x-6'); }
-            else { bg.classList.replace('bg-red-500', 'bg-gray-300'); dot.classList.replace('translate-x-6', 'translate-x-0'); }
-        }
-
-        function handleTaskSubmit(e) {
-            e.preventDefault();
-            const idStr = document.getElementById('mt-id').value;
-
-            const datePart = document.getElementById('mt-date-part').value;
-            const timePart = document.getElementById('mt-time-part').value;
-            let finalDate = "";
-
-            if(datePart) {
-                finalDate = datePart;
-                if(timePart) finalDate += `T${timePart}`;
-                else finalDate += `T00:00`;
-            }
-
-            const data = {
-                text: document.getElementById('mt-text').value,
-                subject: document.getElementById('mt-subj').value,
-                date: finalDate,
-                urgent: document.getElementById('mt-urgent-check').checked
-            };
-
-            if(idStr) {
-                const t = state.tasks.find(x => x.id == idStr);
-                if(t) Object.assign(t, data);
-            } else {
-                state.tasks.unshift({ ...data, id: Date.now(), done: false });
-            }
-            closeModal('modal-task');
-            renderAllUI();
-        }
-
-        // === ОСТАЛЬНЫЕ ФУНКЦИИ (БЕЗ ИЗМЕНЕНИЙ) ===
-        function handleShare(event) { if(event) event.stopPropagation(); navigator.clipboard.writeText(window.location.href).then(() => { const sIcon = document.getElementById('share-icon'), cIcon = document.getElementById('check-icon'), btn = document.getElementById('share-btn'); sIcon.classList.add('hidden'); cIcon.classList.remove('hidden'); btn.classList.add('bg-green-50', 'border-green-200'); setTimeout(() => { sIcon.classList.remove('hidden'); cIcon.classList.add('hidden'); btn.classList.remove('bg-green-50', 'border-green-200'); }, 2000); }); }
-        function toggleAISummary(id, event) { if(event) event.stopPropagation(); const idx = state.expandedAI.indexOf(id); if(idx > -1) state.expandedAI.splice(idx, 1); else state.expandedAI.push(id); renderFeed(); if(document.getElementById('view-favorites').classList.contains('active')) renderFavorites(); }
-        function generateAI(id, event) { if(event) event.stopPropagation(); const m = state.materials.find(x => x.id === id); m.aiStatus = 'loading'; renderAllUI(); setTimeout(() => { m.ai = "Анализ завершен успешно."; m.aiStatus = 'ready'; state.expandedAI.push(id); renderAllUI(); }, 2000); }
-        function resetFeedFilters() { document.getElementById('filter-subject').value = 'All'; document.getElementById('filter-course').value = 'All'; document.getElementById('filter-type').value = 'All'; renderFeed(); }
-        function switchView(id) {
-            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-            document.getElementById('view-' + id).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-            document.getElementById('nav-' + id).classList.add('active');
-            if(id === 'tasks') renderTasks();
-            if(id === 'favorites') renderFavorites();
-            if(id === 'settings') initSettingsFields();
-            lucide.createIcons();
-        }
-        function openModal(id) { document.getElementById(id).classList.replace('modal-hidden', 'modal-visible'); document.body.style.overflow = 'hidden'; lucide.createIcons(); }
-        function closeModal(id) { document.getElementById(id).classList.replace('modal-visible', 'modal-hidden'); document.body.style.overflow = ''; }
-        function renderSidebar() {
-            document.getElementById('sb-user-name').innerText = state.user.name;
-
-            const sbText = document.getElementById('sb-avatar-text');
-            const sbImg = document.getElementById('sb-avatar-img');
-
-            if(state.user.avatarUrl) {
-                sbText.classList.add('hidden');
-                sbImg.src = state.user.avatarUrl;
-                sbImg.classList.remove('hidden');
-            } else {
-                sbText.innerText = state.user.name.charAt(0);
-                sbText.classList.remove('hidden');
-                sbImg.classList.add('hidden');
-            }
-
-            const urgentT = state.tasks.filter(t => t.urgent);
-            const badge = document.getElementById('tasks-badge');
-            if(urgentT.length > 0) { badge.innerText = urgentT.length; badge.classList.remove('hidden'); } else badge.classList.add('hidden');
-            const list = document.getElementById('urgent-tasks-list');
-            if (urgentT.length > 0) { document.getElementById('urgent-section').classList.remove('hidden'); list.innerHTML = urgentT.slice(0, 3).map(t => `<div onclick="switchView('tasks')" class="w-full p-3 rounded-2xl bg-red-50 border border-red-100 cursor-pointer transition-all hover:bg-red-100"><p class="text-[12px] font-bold text-gray-800 line-clamp-1">${t.text}</p></div>`).join(''); } else document.getElementById('urgent-section').classList.add('hidden');
-        }
-        function openUserProfile(id) { const isMe = id === state.user.id; const u = isMe ? state.user : { name: "Алексей Петров", university: "Технический ВУЗ", bio: "Увлеченный студент.", course: "2", telegram: "@author_tg" }; document.getElementById('up-avatar').innerText = u.name.charAt(0); document.getElementById('up-name').innerText = u.name; document.getElementById('up-uni').innerText = u.university; document.getElementById('up-bio').innerText = u.bio; document.getElementById('up-course').innerText = u.course + "-й курс"; document.getElementById('up-tg').innerText = u.telegram; document.getElementById('up-tg').href = "https://t.me/" + u.telegram.replace('@',''); openModal('modal-profile'); }
-        function renderStorage() { const list = document.getElementById('storage-list'); const subjF = document.getElementById('storage-filter-subject').value; const typeF = document.getElementById('storage-filter-type').value; const subjSelect = document.getElementById('storage-filter-subject'); if (subjSelect.options.length === 1) { [...new Set(state.materials.map(m => m.category))].sort().forEach(c => subjSelect.add(new Option(c, c))); } const myFiles = state.materials.filter(m => { const isMine = m.authorId === state.user.id; const matchSubj = subjF === 'All' || m.category === subjF; const matchType = typeF === 'All' || m.type === typeF; return isMine && matchSubj && matchType; }); document.getElementById('storage-count').innerText = myFiles.length; if (myFiles.length === 0) { list.innerHTML = `<tr><td colspan="4" class="px-8 py-20 text-center text-gray-400 font-semibold uppercase tracking-widest text-xs">Нет файлов по заданным фильтрам</td></tr>`; return; } list.innerHTML = myFiles.map(m => `<tr class="hover:bg-gray-50/80 cursor-pointer transition-all group" onclick="openEditModal(${m.id})"><td class="px-8 py-6"><div class="flex items-center gap-4"><div class="p-3 bg-blue-50 text-apple-blue rounded-2xl group-hover:scale-105 transition-transform"><i data-lucide="file-text" class="w-6 h-6"></i></div><div><p class="font-bold text-apple-text tracking-tight">${m.title}</p><p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">${m.date} • ${m.type}</p></div></div></td><td class="px-8 py-6"><span class="px-3 py-1 bg-gray-100 rounded-lg text-[10px] font-bold text-gray-500 uppercase tracking-widest">${m.category}</span></td><td class="px-8 py-6">${m.isPrivate ? '<div class="flex items-center gap-2"><i data-lucide="lock" class="w-4 h-4 text-amber-500"></i><span class="text-xs text-gray-400 font-medium">Личное</span></div>' : '<div class="flex items-center gap-2"><i data-lucide="globe" class="w-4 h-4 text-green-500"></i><span class="text-xs text-gray-400 font-medium">Публичное</span></div>'}</td><td class="px-8 py-6 text-right"><div class="flex justify-end gap-2"><a href="/static/${m.file}" download onclick="event.stopPropagation()" class="p-2.5 bg-gray-50 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all" title="Скачать: ${m.file}"><i data-lucide="download" class="w-4 h-4"></i></a><button onclick="event.stopPropagation(); openEditModal(${m.id})" class="p-2.5 bg-gray-50 text-gray-400 hover:text-apple-blue hover:bg-white hover:shadow-sm rounded-xl transition-all" title="Редактировать"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button onclick="event.stopPropagation(); deleteMaterial(${m.id})" class="p-2.5 bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all" title="Удалить"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td></tr>`).join(''); lucide.createIcons(); }
-        function resetStorageFilters() { document.getElementById('storage-filter-subject').value = 'All'; document.getElementById('storage-filter-type').value = 'All'; renderStorage(); }
-        function openFormModal() { document.getElementById('mf-head').innerText = "Загрузка материала"; document.getElementById('mf-id').value = ""; document.getElementById('mf-delete-btn').classList.add('hidden'); document.querySelector('#modal-form form').reset(); state.selectedFiles = []; renderFileList(); setFormPrivate(false); openModal('modal-form'); }
-        function openEditModal(id) { const m = state.materials.find(x => x.id === id); if (!m) return; document.getElementById('mf-head').innerText = "Редактирование"; document.getElementById('mf-id').value = m.id; document.getElementById('mf-name').value = m.title; document.getElementById('mf-cat').value = m.category; document.getElementById('mf-course').value = m.course; document.getElementById('mf-type').value = m.type; document.getElementById('mf-desc').value = m.desc || ""; state.selectedFiles = [{ name: m.file, size: "12.5 MB", type: m.file.split('.').pop() }]; renderFileList(); document.getElementById('mf-delete-btn').classList.remove('hidden'); setFormPrivate(m.isPrivate); openModal('modal-form'); }
-        function toggleFormPrivate() { const check = document.getElementById('mf-private-check'); setFormPrivate(!check.checked); }
-        function setFormPrivate(isPrivate) { const check = document.getElementById('mf-private-check'); const bg = document.getElementById('mf-switch-bg'); const dot = document.getElementById('mf-switch-dot'); const icon = document.getElementById('mf-lock-icon'); check.checked = isPrivate; if(isPrivate) { bg.classList.replace('bg-gray-300', 'bg-apple-blue'); dot.classList.replace('translate-x-0', 'translate-x-6'); icon.classList.add('text-apple-blue'); } else { bg.classList.replace('bg-apple-blue', 'bg-gray-300'); dot.classList.replace('translate-x-6', 'translate-x-0'); icon.classList.remove('text-apple-blue'); } }
-        function handleFormSubmit(e) { e.preventDefault(); const id = document.getElementById('mf-id').value; let fileName = "unknown_file.pdf"; if (state.selectedFiles.length > 0) fileName = state.selectedFiles.length === 1 ? state.selectedFiles[0].name : `Архив (${state.selectedFiles.length} файлов)`; const data = { title: document.getElementById('mf-name').value, category: document.getElementById('mf-cat').value.toUpperCase(), course: document.getElementById('mf-course').value, type: document.getElementById('mf-type').value, desc: document.getElementById('mf-desc').value, isPrivate: document.getElementById('mf-private-check').checked }; if(id) { let m = state.materials.find(x => x.id == id); if (m) { Object.assign(m, data); m.file = fileName; } } else { state.materials.unshift({ ...data, id: Date.now(), author: state.user.name, authorId: state.user.id, date: new Date().toLocaleDateString('ru-RU'), likes: 0, isLiked: false, isFav: false, ai: null, aiStatus: 'none', file: fileName }); } closeModal('modal-form'); renderAllUI(); }
-        function deleteMaterial(id) { if(confirm("Вы уверены? Удаление нельзя отменить.")) { state.materials = state.materials.filter(x => x.id != id); renderAllUI(); } }
-        function handleDeleteCurrent() { const id = document.getElementById('mf-id').value; if (id) { deleteMaterial(id); closeModal('modal-form'); } }
-        function handleFileSelect(input) { const files = Array.from(input.files); files.forEach(file => { state.selectedFiles.push({ name: file.name, size: (file.size / 1024 / 1024).toFixed(2) + ' MB', type: file.name.split('.').pop().toLowerCase() }); }); input.value = ''; renderFileList(); }
-        function removeFile(index) { state.selectedFiles.splice(index, 1); renderFileList(); }
-        function renderFileList() { const container = document.getElementById('file-list-container'); container.innerHTML = state.selectedFiles.map((f, i) => { let iconClass = "bg-blue-50 text-blue-500"; let iconName = "file-text"; if(['html', 'css', 'js', 'py'].includes(f.type)) { iconClass = "bg-green-50 text-green-500"; iconName = "code"; } return `<div class="flex items-center justify-between p-4 bg-white border border-blue-100 rounded-2xl shadow-sm animate-fade-in group hover:border-blue-200 transition-colors"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded-xl ${iconClass} flex items-center justify-center transition-none"><i data-lucide="${iconName}" class="w-5 h-5"></i></div><div><p class="text-sm font-bold text-gray-800 line-clamp-1 break-all">${f.name}</p><p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">${f.size}</p></div></div><button type="button" onclick="removeFile(${i})" class="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"><i data-lucide="trash-2" class="w-5 h-5"></i></button></div>`}).join(''); lucide.createIcons(); }
-        function goToFeedFilter(cat) { document.getElementById('filter-course').value = 'All'; document.getElementById('filter-type').value = 'All'; const subjectSelect = document.getElementById('filter-subject'); if (subjectSelect.options.length === 1) { [...new Set(state.materials.map(m => m.category))].sort().forEach(c => subjectSelect.add(new Option(c, c))); } subjectSelect.value = cat; switchView('feed'); renderFeed(); }
-        function renderFavorites() { const catList = document.getElementById('fav-categories-list'); const grid = document.getElementById('fav-grid'); if (state.favoriteCategories.length === 0) { catList.innerHTML = `<p class="text-xs text-gray-400">Нет избранных предметов</p>`; } else { catList.innerHTML = state.favoriteCategories.map(cat => `<div class="inline-flex items-center rounded-2xl bg-yellow-50 border border-yellow-200 shadow-sm hover:shadow-md transition-all"><button onclick="goToFeedFilter('${cat}')" class="px-4 py-2.5 text-yellow-700 font-bold text-[10px] uppercase tracking-widest hover:bg-yellow-100 rounded-l-2xl transition-colors" title="Перейти к материалам">${cat}</button><div class="w-px h-4 bg-yellow-200/50"></div><button onclick="toggleCategoryFav('${cat}')" class="px-3 py-2.5 text-yellow-600 hover:text-red-500 hover:bg-red-50 rounded-r-2xl transition-colors" title="Удалить из избранного"><i data-lucide="x" class="w-3 h-3"></i></button></div>`).join(''); } const favMaterials = state.materials.filter(m => m.isFav); if (favMaterials.length === 0) { grid.innerHTML = `<div class="col-span-full py-20 text-center text-gray-400 font-semibold uppercase tracking-widest text-xs">У вас пока нет сохраненных материалов</div>`; } else { grid.innerHTML = favMaterials.map(m => { return `<div class="bg-white p-7 rounded-[2.5rem] shadow-sm border border-gray-50 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-500 cursor-pointer flex flex-col justify-between group" onclick="openDetail(${m.id})"><div><div class="flex justify-between items-start mb-6"><div class="flex gap-2"><span class="px-2.5 py-1.5 rounded-xl text-[10px] font-bold bg-blue-50 text-apple-blue uppercase">${m.type}</span><span class="px-2.5 py-1.5 rounded-xl text-[10px] font-bold bg-gray-50 text-gray-500 uppercase">${m.course} КУРС</span></div><button onclick="event.stopPropagation(); toggleCategoryFav('${m.category}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all ${state.favoriteCategories.includes(m.category) ? 'bg-yellow-50 text-yellow-600 border-yellow-200' : 'bg-gray-50/50 text-gray-400 border-gray-100'}"><span class="text-[10px] font-bold uppercase">${m.category}</span><i data-lucide="star" class="w-3.5 h-3.5 ${state.favoriteCategories.includes(m.category) ? 'fill-current' : ''} transition-none"></i></button></div><h3 class="text-2xl font-bold text-apple-text mb-2 line-clamp-2 leading-tight tracking-tight">${m.title}</h3><div class="flex items-center gap-2 mb-6"><i data-lucide="user" class="w-3 h-3 text-gray-300 transition-none"></i><span class="text-xs font-medium text-gray-400 hover:text-apple-blue transition-colors underline underline-offset-4 decoration-gray-200 cursor-pointer" onclick="event.stopPropagation(); openUserProfile(${m.authorId})">${m.author}</span><span class="w-1 h-1 rounded-full bg-gray-200"></span><span class="text-xs font-medium text-gray-300">${m.date}</span></div></div><div class="pt-6 border-t border-gray-50 flex items-center justify-between"><div class="flex gap-4"><button onclick="event.stopPropagation(); toggleLike(${m.id})" class="flex items-center gap-1.5 transition-colors ${m.isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}"><i data-lucide="heart" class="w-4 h-4 ${m.isLiked ? 'fill-current' : ''} transition-none"></i><span class="text-xs font-bold">${m.likes}</span></button><button onclick="event.stopPropagation(); toggleMaterialFav(${m.id})" class="transition-colors ${m.isFav ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}"><i data-lucide="star" class="w-4 h-4 ${m.isFav ? 'fill-current' : ''} transition-none"></i></button></div><a href="/static/${m.file}" download onclick="event.stopPropagation()" class="bg-gray-100 text-gray-700 px-5 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-all shadow-sm active:scale-95">Скачать <i data-lucide="download" class="w-3.5 h-3.5 inline transition-none"></i></a></div></div>`; }).join(''); } lucide.createIcons(); }
-        function openDetail(id) { const m = state.materials.find(x => x.id === id); state.currentMaterialId = id; document.getElementById('md-title').innerText = m.title; document.getElementById('md-cat').innerText = m.category; document.getElementById('md-date').innerText = m.date; document.getElementById('md-author-name').innerText = m.author; document.getElementById('md-author-avatar').innerText = m.author.charAt(0); document.getElementById('md-desc').innerText = m.desc || ""; document.getElementById('md-likes-stat').innerText = m.likes; document.getElementById('md-download-link').href = "/static/" + m.file; const aiC = document.getElementById('md-ai-container'); if (m.aiStatus === 'loading') aiC.innerHTML = `<div class="rounded-[2rem] bg-gray-50 border border-gray-100 p-8 flex items-center justify-center min-h-[150px]"><div class="flex flex-col items-center gap-3 text-gray-400"><i data-lucide="loader-2" class="w-8 h-8 animate-spin text-indigo-500"></i><span class="text-[10px] font-bold uppercase uppercase">Анализ...</span></div></div>`; else if (m.aiStatus === 'ready') aiC.innerHTML = `<div class="relative overflow-hidden rounded-[2rem] bg-[#F4F5FF] border border-indigo-100 p-8 shadow-inner"><div class="relative z-10"><div class="flex items-center gap-2.5 mb-4"><div class="p-2 bg-white rounded-xl shadow-sm text-indigo-600 transition-none"><i data-lucide="bot" class="w-5 h-5"></i></div><h3 class="text-[11px] font-bold text-indigo-900 uppercase tracking-[0.15em]">AI Анализ содержания</h3></div><p class="text-gray-700 font-semibold text-sm leading-relaxed">${m.ai}</p></div><i data-lucide="bot" class="absolute -bottom-4 -right-4 w-32 h-32 text-indigo-500/5 rotate-12 pointer-events-none transition-none"></i></div>`; else aiC.innerHTML = `<button onclick="generateAI(${m.id})" class="w-full py-6 rounded-[2rem] border-2 border-dashed border-purple-200 text-purple-600 transition-all text-sm font-bold uppercase tracking-widest flex items-center justify-center gap-3 group hover:bg-purple-50 hover:border-purple-300"><i data-lucide="sparkles" class="w-6 h-6 transition-none group-hover:scale-110"></i> Запустить AI Анализ материала</button>`; const filesContainer = document.getElementById('md-file-card-container'); const fileName = m.file || "unknown.pdf"; const ext = fileName.split('.').pop().toLowerCase(); let iconColor = "text-red-500 bg-red-50"; let iconName = "file-text"; if (ext === 'doc' || ext === 'docx') { iconColor = "text-blue-500 bg-blue-50"; } else if (ext === 'ppt' || ext === 'pptx') { iconColor = "text-orange-500 bg-orange-50"; } else if (ext === 'zip' || ext === 'rar') { iconColor = "text-gray-500 bg-gray-50"; iconName = "archive"; } filesContainer.innerHTML = `<div class="p-4 rounded-2xl border border-gray-100 flex items-center justify-between mt-6 hover:bg-gray-50 transition-colors cursor-pointer" onclick="document.getElementById('md-download-link').click()"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-xl ${iconColor} flex items-center justify-center"><i data-lucide="${iconName}" class="w-6 h-6"></i></div><div><p class="font-bold text-sm text-gray-800 uppercase">${ext}</p><p class="text-xs text-gray-400 font-bold uppercase tracking-wider">4.2 MB</p></div></div><span class="text-xs font-bold text-apple-blue cursor-pointer hover:underline">Предпросмотр</span></div>`; const likeBtn = document.getElementById('md-like-btn'); likeBtn.innerHTML = `<i data-lucide="heart" class="w-5 h-5 ${m.isLiked ? 'fill-current' : ''} transition-none"></i> <span>${m.likes}</span>`; likeBtn.className = `flex items-center gap-2 px-6 py-4 rounded-2xl border font-bold text-sm transition-all ${m.isLiked ? 'bg-red-50 border-red-200 text-red-500' : 'bg-white border-gray-100 text-gray-500'}`; likeBtn.onclick = () => { m.isLiked = !m.isLiked; m.likes += m.isLiked ? 1 : -1; renderAllUI(); }; const favBtn = document.getElementById('md-fav-btn'); favBtn.innerHTML = `<i data-lucide="star" class="w-6 h-6 ${m.isFav ? 'fill-current' : ''} transition-none"></i>`; favBtn.className = `p-4 rounded-2xl border transition-all ${m.isFav ? 'bg-yellow-50 border-yellow-200 text-yellow-500' : 'bg-white border-gray-100 text-gray-400'}`; favBtn.onclick = () => { m.isFav = !m.isFav; renderAllUI(); }; document.getElementById('md-author-trigger').onclick = () => { closeModal('modal-detail'); setTimeout(() => openUserProfile(m.authorId), 300); }; openModal('modal-detail'); }
-        function toggleCategoryFav(cat) { state.favoriteCategories = state.favoriteCategories.includes(cat) ? state.favoriteCategories.filter(c => c !== cat) : [...state.favoriteCategories, cat]; renderAllUI(); }
-        function toggleLike(id) { const m = state.materials.find(x => x.id === id); m.isLiked = !m.isLiked; m.likes += m.isLiked ? 1 : -1; renderAllUI(); }
-        function toggleMaterialFav(id) { const m = state.materials.find(x => x.id === id); m.isFav = !m.isFav; renderAllUI(); }
-        function renderFeed() { const grid = document.getElementById('feed-grid'); const search = document.getElementById('feed-search').value.toLowerCase(); const subjF = document.getElementById('filter-subject').value; const courseF = document.getElementById('filter-course').value; const typeF = document.getElementById('filter-type').value; const subjSelect = document.getElementById('filter-subject'); if (subjSelect.options.length === 1) [...new Set(state.materials.map(m => m.category))].sort().forEach(c => subjSelect.add(new Option(c, c))); const filtered = state.materials.filter(m => (m.authorId === state.user.id || !m.isPrivate) && (m.title.toLowerCase().includes(search) || m.author.toLowerCase().includes(search)) && (subjF === 'All' || m.category === subjF) && (courseF === 'All' || m.course.toString() === courseF) && (typeF === 'All' || m.type === typeF) ); grid.innerHTML = filtered.map(m => { const isExpanded = state.expandedAI.includes(m.id), isCatFav = state.favoriteCategories.includes(m.category); let ai = ''; if(m.aiStatus === 'loading') ai = `<button class="w-full py-3 rounded-2xl bg-gray-100 text-[11px] font-bold uppercase flex items-center justify-center gap-2 cursor-wait"><i data-lucide="loader-2" class="w-4 h-4 animate-spin text-indigo-500"></i> Генерирую...</button>`; else if(m.aiStatus === 'ready') ai = `<button onclick="toggleAISummary(${m.id}, event)" class="w-full py-3 rounded-2xl bg-gradient-to-r from-violet-50 to-purple-50 text-purple-700 text-[11px] font-bold uppercase border border-purple-100 flex items-center justify-center gap-2 shadow-sm">AI Анализ <i data-lucide="chevron-down" class="w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}"></i></button>${isExpanded ? `<div class="mt-3 p-4 bg-purple-50/50 rounded-2xl border border-purple-100 flex gap-3 animate-fade-in"><div class="flex-shrink-0 mt-0.5"><i data-lucide="bot" class="w-5 h-5 text-purple-600 transition-none"></i></div><p class="text-[11px] text-gray-700 font-semibold">${m.ai}</p></div>` : ''}`; else ai = `<button onclick="generateAI(${m.id}, event)" class="w-full py-3 rounded-2xl border-2 border-dashed border-purple-200 text-purple-600 hover:bg-purple-50 transition-all text-[11px] font-bold uppercase flex items-center justify-center gap-2"><i data-lucide="sparkles" class="w-3.5 h-3.5 transition-none"></i> Создать AI обзор</button>`; return `<div class="bg-white p-7 rounded-[2.5rem] shadow-sm border border-gray-50 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-500 cursor-pointer flex flex-col justify-between group" onclick="openDetail(${m.id})"><div><div class="flex justify-between items-start mb-6"><div class="flex gap-2"><span class="px-2.5 py-1.5 rounded-xl text-[10px] font-bold bg-blue-50 text-apple-blue uppercase">${m.type}</span><span class="px-2.5 py-1.5 rounded-xl text-[10px] font-bold bg-gray-50 text-gray-500 uppercase">${m.course} КУРС</span></div><button onclick="event.stopPropagation(); toggleCategoryFav('${m.category}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all ${isCatFav ? 'bg-yellow-50 text-yellow-600 border-yellow-200' : 'bg-gray-50/50 text-gray-400 border-gray-100'}"><span class="text-[10px] font-bold uppercase">${m.category}</span><i data-lucide="star" class="w-3.5 h-3.5 ${isCatFav ? 'fill-current' : ''} transition-none"></i></button></div><h3 class="text-2xl font-bold text-apple-text mb-2 line-clamp-2 leading-tight tracking-tight">${m.title}</h3><div class="flex items-center gap-2 mb-6"><i data-lucide="user" class="w-3 h-3 text-gray-300 transition-none"></i><span class="text-xs font-medium text-gray-400 hover:text-apple-blue transition-colors underline underline-offset-4 decoration-gray-200 cursor-pointer" onclick="event.stopPropagation(); openUserProfile(${m.authorId})">${m.author}</span><span class="w-1 h-1 rounded-full bg-gray-200"></span><span class="text-xs font-medium text-gray-300">${m.date}</span></div><div class="mb-6">${ai}</div></div><div class="pt-6 border-t border-gray-50 flex items-center justify-between"><div class="flex gap-4"><button onclick="event.stopPropagation(); toggleLike(${m.id})" class="flex items-center gap-1.5 transition-colors ${m.isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}"><i data-lucide="heart" class="w-4 h-4 ${m.isLiked ? 'fill-current' : ''} transition-none"></i><span class="text-xs font-bold">${m.likes}</span></button><button onclick="event.stopPropagation(); toggleMaterialFav(${m.id})" class="transition-colors ${m.isFav ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}"><i data-lucide="star" class="w-4 h-4 ${m.isFav ? 'fill-current' : ''} transition-none"></i></button></div><a href="/static/${m.file}" download onclick="event.stopPropagation()" class="bg-gray-100 text-gray-700 px-5 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-all shadow-sm active:scale-95">Скачать <i data-lucide="download" class="w-3.5 h-3.5 inline transition-none"></i></a></div></div>`; }).join(''); lucide.createIcons(); }
-
+    function handleDeleteTaskCurrent() {
+        const id = document.getElementById('mt-id').value;
+        if(id) { deleteTask(id); closeModal('modal-task'); }
+    }
     </script>
 </body>
 </html>
