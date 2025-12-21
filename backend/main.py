@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 load_dotenv() # Загружаем переменные
 
 # Импорт твоих файлов
-from database import get_db, engine
+from backend.database import get_db, engine
 import models
 
 # 1. Создаем таблицы
