@@ -21,7 +21,7 @@ load_dotenv() # Загружаем переменные
 
 # Импорт твоих файлов
 from backend.database import get_db, engine
-import models
+from backend import models
 
 # 1. Создаем таблицы
 models.Base.metadata.create_all(bind=engine)
