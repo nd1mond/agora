@@ -122,12 +122,14 @@
                     <p class="text-gray-500 font-medium mt-1">Находите лекции, конспекты и шпоры</p>
                 </div>
                 <div class="relative w-full md:w-96 group">
-                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-apple-blue transition-colors"></i>
-                    <input type="text" id="feed-search" oninput="renderFeed()" placeholder="Поиск по материалам..." class="w-full pl-12 pr-4 py-4 bg-white border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-blue-50 transition-all font-medium shadow-sm">
-                </div>
+                <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-apple-blue transition-colors"></i>
+                <input type="text" id="feed-search" oninput="handleSearch(this)" placeholder="Поиск по материалам..." class="w-full pl-12 pr-12 py-4 bg-white border border-gray-100 rounded-2xl outline-none focus:ring-4 focus:ring-blue-50 transition-all font-medium shadow-sm">
+                <button id="search-clear-btn" onclick="clearSearch()" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-all hidden">
+                     <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 items-end">
+        </div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 items-end">
                 <div class="space-y-2">
                     <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Предмет</label>
                     <div class="relative group">
@@ -405,7 +407,7 @@
                         <div id="md-author-avatar" class="w-12 h-12 rounded-full bg-apple-blue flex items-center justify-center text-white font-bold text-sm shadow-lg ring-4 ring-white transition-none"></div>
                         <div class="text-left">
                             <p id="md-author-name" class="text-base font-bold text-gray-800 leading-none mb-1 group-hover:text-apple-blue transition-colors underline underline-offset-4 decoration-gray-200"></p>
-                            <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Студент • Рейтинг 4.9</p>
+                            <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Студент • Рейтинг <span id="md-author-rating" class="text-apple-blue font-bold"></span></p>
                         </div>
                     </div>
                 </div>
@@ -620,13 +622,38 @@
     // Проставляем статусы AI при загрузке
     state.materials.forEach(m => m.aiStatus = m.ai ? 'ready' : 'none');
 
-    // === ЗАПУСК ===
     window.onload = () => {
+        // Рендерим данные
         renderSidebar();
         renderFeed();
         renderStorage();
         renderTasks();
+
+        // ВОССТАНАВЛИВАЕМ вкладку
+        const lastTab = localStorage.getItem("activeTab");
+        if (lastTab) switchView(lastTab);
+
         lucide.createIcons();
+
+        // === НОВОЕ: ПРОВЕРЯЕМ ССЫЛКУ ===
+        // Ищем параметр ?id=... в адресной строке
+        const urlParams = new URLSearchParams(window.location.search);
+        const materialId = urlParams.get('id');
+
+        if (materialId) {
+            // Если ID есть, ищем материал в базе
+            const mId = parseInt(materialId);
+            const exists = state.materials.find(m => m.id === mId);
+
+            if (exists) {
+                // Небольшая задержка, чтобы интерфейс успел отрисоваться
+                setTimeout(() => {
+                    openDetail(mId);
+                    // Очищаем URL, чтобы при обновлении страницы окно не открывалось вечно
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }, 500);
+            }
+        }
     };
 
     function renderAllUI() {
@@ -641,6 +668,8 @@
 
     // === ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ===
     function switchView(id) {
+        // 1. СОХРАНЯЕМ выбор пользователя в память браузера
+        localStorage.setItem("activeTab", id);
         document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
         document.getElementById('view-' + id).classList.add('active');
 
@@ -717,6 +746,30 @@
 
     function handleFileSelect(input) {
         const files = Array.from(input.files);
+
+        // === 1. АВТОЗАПОЛНЕНИЕ НАЗВАНИЯ ===
+        const nameInput = document.getElementById('mf-name');
+
+        // Если файлы есть И поле названия сейчас пустое — заполняем его
+        if (files.length > 0 && nameInput && nameInput.value.trim() === '') {
+            // Берем имя первого файла
+            let fileName = files[0].name;
+
+            // Убираем расширение (всё после последней точки, например .pdf)
+            fileName = fileName.replace(/\.[^/.]+$/, "");
+
+
+
+            // Делаем первую букву заглавной (Красивый регистр)
+            if (fileName.length > 0) {
+                fileName = fileName.charAt(0).toUpperCase() + fileName.slice(1);
+            }
+
+            // Вставляем в поле
+            nameInput.value = fileName;
+        }
+        // ===================================
+
         files.forEach(file => {
             state.selectedFiles.push({
                 name: file.name,
@@ -945,6 +998,14 @@
     function openDetail(id) {
         const m = state.materials.find(x => x.id === id);
         state.currentMaterialId = id;
+        // 1. Считаем рейтинг автора прямо здесь
+        // Берем все материалы этого автора
+        const authorMaterials = state.materials.filter(mat => mat.authorId === m.authorId);
+        // Складываем все их лайки
+        const totalLikes = authorMaterials.reduce((sum, mat) => sum + mat.likes, 0);
+        // Формула: 1.0 + (лайки / 10). Например, 20 лайков = рейтинг 3.0
+        let calculatedRating = 1.0 + (totalLikes * 0.1);
+        if (calculatedRating > 5.0) calculatedRating = 5.0; // Максимум 5.0
 
         document.getElementById('md-title').innerText = m.title;
         document.getElementById('md-cat').innerText = m.category;
@@ -952,6 +1013,7 @@
         document.getElementById('md-author-name').innerText = m.author;
         document.getElementById('md-author-avatar').innerText = m.author.charAt(0);
         document.getElementById('md-desc').innerText = m.desc || "";
+        document.getElementById('md-author-rating').innerText = calculatedRating.toFixed(1);
 
         document.getElementById('md-likes-stat').innerText = m.likes;
         document.getElementById('md-downloads-stat').innerText = m.downloads;
@@ -1090,7 +1152,46 @@
         try { await fetch("/api/update_fav_cats", { method: "POST", body: formData }); } catch(e) { console.error(e); }
     }
     function goToFeedFilter(cat) { document.getElementById('filter-course').value = 'All'; document.getElementById('filter-type').value = 'All'; const subjectSelect = document.getElementById('filter-subject'); if (subjectSelect.options.length === 1) { [...new Set(state.materials.map(m => m.category))].sort().forEach(c => subjectSelect.add(new Option(c, c))); } subjectSelect.value = cat; switchView('feed'); renderFeed(); }
-    function handleShare(event) { if(event) event.stopPropagation(); navigator.clipboard.writeText(window.location.href).then(() => { const sIcon = document.getElementById('share-icon'), cIcon = document.getElementById('check-icon'), btn = document.getElementById('share-btn'); sIcon.classList.add('hidden'); cIcon.classList.remove('hidden'); btn.classList.add('bg-green-50', 'border-green-200'); setTimeout(() => { sIcon.classList.remove('hidden'); cIcon.classList.add('hidden'); btn.classList.remove('bg-green-50', 'border-green-200'); }, 2000); }); }
+    async function handleShare(event) {
+        if(event) event.stopPropagation();
+
+        // 1. Генерируем ссылку
+        const baseUrl = window.location.origin + window.location.pathname;
+        const shareUrl = `${baseUrl}?id=${state.currentMaterialId}`;
+
+        // 2. СРАЗУ копируем в буфер (без системного меню)
+        try {
+            await navigator.clipboard.writeText(shareUrl);
+
+            // 3. Анимация зеленой галочки
+            const btn = document.getElementById('share-btn');
+            const sIcon = document.getElementById('share-icon');
+            const cIcon = document.getElementById('check-icon');
+
+            // Красим кнопку в зеленый
+            btn.classList.add('border-green-200', 'bg-green-50');
+
+            // Меняем иконку
+            sIcon.classList.add('hidden');
+            cIcon.classList.remove('hidden');
+            setTimeout(() => cIcon.classList.remove('scale-0'), 10);
+
+            // Через 2 секунды возвращаем всё назад
+            setTimeout(() => {
+                cIcon.classList.add('scale-0');
+                setTimeout(() => {
+                    cIcon.classList.add('hidden');
+                    sIcon.classList.remove('hidden');
+                    btn.classList.remove('border-green-200', 'bg-green-50');
+                }, 150);
+            }, 2000);
+
+        } catch (err) {
+            // Если вдруг копирование запрещено браузером (редко)
+            // Покажем простое окно, чтобы человек скопировал сам
+            prompt("Скопируйте ссылку вручную:", shareUrl);
+        }
+    }
     function toggleAISummary(id, event) { if(event) event.stopPropagation(); const idx = state.expandedAI.indexOf(id); if(idx > -1) state.expandedAI.splice(idx, 1); else state.expandedAI.push(id); renderFeed(); if(document.getElementById('view-favorites').classList.contains('active')) renderFavorites(); }
 
     // === ПРОФИЛЬ, НАСТРОЙКИ, ЗАДАЧИ ===
@@ -1438,6 +1539,27 @@
     function handleDeleteTaskCurrent() {
         const id = document.getElementById('mt-id').value;
         if(id) { deleteTask(id); closeModal('modal-task'); }
+    }
+
+    // === ЛОГИКА ПОИСКА С КРЕСТИКОМ ===
+
+    function handleSearch(input) {
+        const btn = document.getElementById('search-clear-btn');
+        // Если в поле есть текст — показываем крестик, иначе скрываем
+        if (input.value.length > 0) {
+            btn.classList.remove('hidden');
+        } else {
+            btn.classList.add('hidden');
+        }
+        // Запускаем сам поиск (твоя старая функция)
+        renderFeed();
+    }
+
+    function clearSearch() {
+        const input = document.getElementById('feed-search');
+        input.value = '';           // Очищаем поле
+        handleSearch(input);        // Скрываем крестик и обновляем ленту
+        input.focus();              // Возвращаем курсор в поле
     }
     </script>
 </body>

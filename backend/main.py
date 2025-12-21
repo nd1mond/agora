@@ -288,6 +288,21 @@ def upload_material(
         files: List[UploadFile] = File(...),  # <--- СПИСОК
         db: Session = Depends(get_db)
 ):
+    # ВСТАВЛЯЕМ СЮДА (Сразу после начала функции):
+    # ---------------------------------------------------
+    # 1. Убираем пробелы по краям
+    title = title.strip()
+    category = category.strip()
+
+    # 2. Делаем первую букву названия заглавной
+    if len(title) > 0:
+        title = title[0].upper() + title[1:]
+
+    # 3. Предметы часто пишут с большой буквы (Физика, Матан)
+    if len(category) > 0:
+        category = category[0].upper() + category[1:]
+    # ---------------------------------------------------
+
     author = db.query(models.User).filter(models.User.email == email).first()
     if not author: author = db.query(models.User).first()
 
@@ -501,6 +516,17 @@ def edit_material_action(
         files: List[UploadFile] = File(None),  # Новые файлы
         db: Session = Depends(get_db)
 ):
+    # ВСТАВЛЯЕМ СЮДА:
+    # ---------------------------------------------------
+    title = title.strip()
+    category = category.strip()
+
+    if len(title) > 0:
+        title = title[0].upper() + title[1:]
+
+    if len(category) > 0:
+        category = category[0].upper() + category[1:]
+    # ---------------------------------------------------
     user = db.query(models.User).filter(models.User.email == email).first()
     material = db.query(models.Material).filter(models.Material.id == material_id).first()
     if not material or not user or material.author_id != user.id:
