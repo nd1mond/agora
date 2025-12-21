@@ -15,6 +15,9 @@ from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from gigachat import GigaChat
 import PyPDF2
 import docx
+from dotenv import load_dotenv
+
+load_dotenv() # Загружаем переменные
 
 # Импорт твоих файлов
 from database import get_db, engine
@@ -37,11 +40,11 @@ templates = Jinja2Templates(directory="templates")
 # 📧 НАСТРОЙКИ ПОЧТЫ
 # ==========================================
 conf = ConnectionConfig(
-    MAIL_USERNAME="za1tsef@yandex.ru",
-    MAIL_PASSWORD="bgzosjdmskgpyxjx",
-    MAIL_FROM="za1tsef@yandex.ru",
-    MAIL_PORT=465,
-    MAIL_SERVER="smtp.yandex.ru",
+    MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
+    MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"),
+    MAIL_FROM=os.getenv("MAIL_FROM"),
+    MAIL_PORT=int(os.getenv("MAIL_PORT", 465)),  # Порт должен быть числом
+    MAIL_SERVER=os.getenv("MAIL_SERVER"),
     MAIL_STARTTLS=False,
     MAIL_SSL_TLS=True,
     USE_CREDENTIALS=True,
@@ -607,7 +610,7 @@ def analyze_material_ai(
 
     if not text_content or len(text_content) < 50: return {"error": "Файл пустой или не читается"}
 
-    CREDENTIALS = "MDE5YjFlYTktNmE2OS03ZDEzLWJhYzItYzA3M2Y5ZjUwZWEyOmUzNWVmOGRlLTEzMjEtNDdjMy1hZWQ3LTQ5MWRmNjc4Y2JiNw=="
+    CREDENTIALS = os.getenv("GIGACHAT_CREDENTIALS")
 
     try:
         with GigaChat(credentials=CREDENTIALS, verify_ssl_certs=False) as giga:
