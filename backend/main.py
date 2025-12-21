@@ -34,7 +34,7 @@ if not os.path.exists("uploads"):
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.mount("/static", StaticFiles(directory="uploads"), name="static")
 
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="/app/backend/templates")
 
 # ==========================================
 # 📧 НАСТРОЙКИ ПОЧТЫ
